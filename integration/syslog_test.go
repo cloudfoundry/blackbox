@@ -15,12 +15,12 @@ import (
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/ginkgomon"
 
-	. "github.com/concourse/blackbox/integration"
+	. "github.com/cloudfoundry/blackbox/integration"
 
 	sl "github.com/ziutek/syslog"
 
-	"github.com/concourse/blackbox"
-	"github.com/concourse/blackbox/syslog"
+	"github.com/cloudfoundry/blackbox"
+	"github.com/cloudfoundry/blackbox/syslog"
 )
 
 var _ = Describe("Blackbox", func() {

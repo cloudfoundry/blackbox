@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/concourse/blackbox/syslog"
+	"github.com/cloudfoundry/blackbox/syslog"
 	"github.com/tedsuo/ifrit/grouper"
 )
 

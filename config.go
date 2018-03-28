@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/concourse/blackbox/syslog"
+	"github.com/cloudfoundry/blackbox/syslog"
 	"gopkg.in/yaml.v2"
 )
 

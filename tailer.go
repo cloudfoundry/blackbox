@@ -8,7 +8,7 @@ import (
 	"github.com/hpcloud/tail"
 	"github.com/hpcloud/tail/watch"
 
-	"github.com/concourse/blackbox/syslog"
+	"github.com/cloudfoundry/blackbox/syslog"
 )
 
 type Tailer struct {

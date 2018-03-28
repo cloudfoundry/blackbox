@@ -4,7 +4,7 @@ package syslogfakes
 import (
 	"sync"
 
-	"github.com/concourse/blackbox/syslog"
+	"github.com/cloudfoundry/blackbox/syslog"
 )
 
 type FakeDrainer struct {

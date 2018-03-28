@@ -9,8 +9,8 @@ import (
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
 
-	"github.com/concourse/blackbox"
-	"github.com/concourse/blackbox/syslog"
+	"github.com/cloudfoundry/blackbox"
+	"github.com/cloudfoundry/blackbox/syslog"
 )
 
 var configPath = flag.String(

@@ -16,7 +16,7 @@ import (
 	"github.com/tedsuo/ifrit/ginkgomon"
 	"github.com/ziutek/syslog"
 
-	"github.com/concourse/blackbox"
+	"github.com/cloudfoundry/blackbox"
 )
 
 type SyslogServer struct {

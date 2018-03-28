@@ -3,7 +3,7 @@ package blackbox_test
 import (
 	"time"
 
-	. "github.com/concourse/blackbox"
+	. "github.com/cloudfoundry/blackbox"
 	"gopkg.in/yaml.v2"
 
 	. "github.com/onsi/ginkgo"
