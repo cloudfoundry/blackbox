@@ -48,7 +48,7 @@ func TestPacketGenerate(t *testing.T) {
 				Message:  "'su root' failed for lonvick on /dev/pts/8",
 			},
 			0,
-			"<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - - - 'su root' failed for lonvick on /dev/pts/8",
+			"<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su rs2 - - 'su root' failed for lonvick on /dev/pts/8",
 		},
 		{
 			// from https://tools.ietf.org/html/rfc5424#section-6.5
@@ -61,7 +61,7 @@ func TestPacketGenerate(t *testing.T) {
 				Message:  `%% It's time to make the do-nuts.`,
 			},
 			0,
-			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc - - - %% It's time to make the do-nuts.",
+			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc rs2 - - %% It's time to make the do-nuts.",
 		},
 		{
 			// test that fractional seconds is at most 6 digits long
@@ -74,7 +74,7 @@ func TestPacketGenerate(t *testing.T) {
 				Message:  `%% It's time to make the do-nuts.`,
 			},
 			0,
-			"<165>1 2003-08-24T05:14:15.123456-07:00 192.0.2.1 myproc - - - %% It's time to make the do-nuts.",
+			"<165>1 2003-08-24T05:14:15.123456-07:00 192.0.2.1 myproc rs2 - - %% It's time to make the do-nuts.",
 		},
 		{
 			// test truncation
@@ -86,8 +86,8 @@ func TestPacketGenerate(t *testing.T) {
 				Tag:      "myproc",
 				Message:  `%% It's time to make the do-nuts.`,
 			},
-			75,
-			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc - - - %% It's time",
+			77,
+			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc rs2 - - %% It's time",
 		},
 		{
 			// test truncation isn't applied when message is already short enough
@@ -99,8 +99,8 @@ func TestPacketGenerate(t *testing.T) {
 				Tag:      "myproc",
 				Message:  `%% It's time to make the do-nuts.`,
 			},
-			97,
-			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc - - - %% It's time to make the do-nuts.",
+			99,
+			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc rs2 - - %% It's time to make the do-nuts.",
 		},
 		{
 			Packet{
@@ -112,7 +112,7 @@ func TestPacketGenerate(t *testing.T) {
 				Message:  "newline:'\n'. nullbyte:'\x00'. carriage return:'\r'.",
 			},
 			0,
-			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc - - - newline:' '. nullbyte:' '. carriage return:' '.",
+			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc rs2 - - newline:' '. nullbyte:' '. carriage return:' '.",
 		},
 	}
 	for _, test := range tests {

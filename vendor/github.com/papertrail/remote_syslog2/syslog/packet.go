@@ -34,9 +34,9 @@ func (p Packet) cleanMessage() string {
 func (p Packet) Generate(max_size int) string {
 	ts := p.Time.Format(rfc5424time)
 	if max_size == 0 {
-		return fmt.Sprintf("<%d>1 %s %s %s - - - %s", p.Priority(), ts, p.Hostname, p.Tag, p.cleanMessage())
+		return fmt.Sprintf("<%d>1 %s %s %s rs2 - - %s", p.Priority(), ts, p.Hostname, p.Tag, p.cleanMessage())
 	} else {
-		msg := fmt.Sprintf("<%d>1 %s %s %s - - - %s", p.Priority(), ts, p.Hostname, p.Tag, p.cleanMessage())
+		msg := fmt.Sprintf("<%d>1 %s %s %s rs2 - - %s", p.Priority(), ts, p.Hostname, p.Tag, p.cleanMessage())
 		if len(msg) > max_size {
 			return msg[0:max_size]
 		} else {
@@ -55,7 +55,7 @@ func Parse(line string) (Packet, error) {
 		tag      string
 	)
 
-	splitLine := strings.Split(line, " - - - ")
+	splitLine := strings.Split(line, " rs2 - - ")
 	if len(splitLine) != 2 {
 		return packet, fmt.Errorf("couldn't parse %s", line)
 	}
