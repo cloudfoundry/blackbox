@@ -1,19 +1,12 @@
 # blackbox
-
-*forward files on to syslog*
-
-![Black Box Flight Recorder](http://i.imgur.com/sCSNdzU.jpg)
+* Slack: #syslog on <https://slack.cloudfoundry.org>
+* Tracker: [CF Platform Logging Improvements][tracker]
+* CI: [Syslog CI][CI]
 
 ## About
-
-Applications often provide only a limited ability to log to syslog and often
-don't log in a consistent format. I also think that syslog is an operational
-concern and the application should not know about where it is logging. Blackbox
-is an experiment to decouple syslogging from an application without messing
-about with syslog configuration (which is tricky on BOSH VMs).
-
 Blackbox will tail all files in sub-directories of a specified `source_dir`, and forward any new lines to a syslog server.
 
+This is currently used in [syslog-release][syslog] and [windows-syslog-release][windows-syslog]. 
 ## Usage
 
 ```
@@ -54,3 +47,8 @@ Currently the priority and facility are hardcoded to `INFO` and `user`.
 ```
 go get -u github.com/cloudfoundry/blackbox/cmd/blackbox
 ```
+
+[CI]: https://syslog.ci.cf-app.com
+[tracker]: https://www.pivotaltracker.com/n/projects/2126318
+[windows-syslog]: https://github.com/cloudfoundry/windows-syslog-release
+[syslog]: https://github.com/cloudfoundry/syslog-release
