@@ -19,21 +19,24 @@ type fileWatcher struct {
 
 	sourceDir          string
 	dynamicGroupClient grouper.DynamicClient
+	hostname           string
 
-	drainerFactory syslog.DrainerFactory
+	drain syslog.Drain
 }
 
 func NewFileWatcher(
 	logger *log.Logger,
 	sourceDir string,
 	dynamicGroupClient grouper.DynamicClient,
-	drainerFactory syslog.DrainerFactory,
+	drain syslog.Drain,
+	hostname string,
 ) *fileWatcher {
 	return &fileWatcher{
 		logger:             logger,
 		sourceDir:          sourceDir,
 		dynamicGroupClient: dynamicGroupClient,
-		drainerFactory:     drainerFactory,
+		drain:              drain,
+		hostname:           hostname,
 	}
 }
 
@@ -88,7 +91,7 @@ func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileI
 }
 
 func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
-	drainer, err := f.drainerFactory.NewDrainer()
+	drainer, err := syslog.NewDrainer(f.drain, f.hostname)
 	if err != nil {
 		f.logger.Fatalf("could not drain to syslog: %s\n", err)
 	}

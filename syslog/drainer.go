@@ -10,9 +10,8 @@ import (
 type Drain struct {
 	Transport string `yaml:"transport"`
 	Address   string `yaml:"address"`
+	CA        string `yaml:"ca"`
 }
-
-//go:generate counterfeiter . Drainer
 
 type Drainer interface {
 	Drain(line string, tag string) error

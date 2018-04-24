@@ -10,7 +10,6 @@ import (
 	"github.com/tedsuo/ifrit/sigmon"
 
 	"github.com/cloudfoundry/blackbox"
-	"github.com/cloudfoundry/blackbox/syslog"
 )
 
 var configPath = flag.String(
@@ -37,8 +36,7 @@ func main() {
 	running := ifrit.Invoke(sigmon.New(group))
 
 	go func() {
-		drainerFactory := syslog.NewDrainerFactory(config.Syslog.Destination, config.Hostname)
-		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, group.Client(), drainerFactory)
+		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, group.Client(), config.Syslog.Destination, config.Hostname)
 		fileWatcher.Watch()
 	}()
 
