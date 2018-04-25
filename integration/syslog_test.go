@@ -496,7 +496,7 @@ var _ = Describe("Blackbox", func() {
 			tlsserver.Stop()
 		})
 
-		FIt("can send messages using tls", func() {
+		It("can send messages using tls", func() {
 			blackboxConfig := blackbox.Config{
 				Hostname: "",
 				Syslog: blackbox.SyslogConfig{
