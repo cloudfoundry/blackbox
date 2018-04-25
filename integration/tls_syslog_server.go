@@ -42,6 +42,7 @@ func (s *TLSSyslogServer) Run() error {
 			// Listen for an incoming connection.
 			conn, err = s.l.Accept()
 			if err != nil {
+				fmt.Println(err)
 				return
 			}
 			defer conn.Close()
@@ -57,7 +58,7 @@ func (s *TLSSyslogServer) Run() error {
 						return
 					}
 				}
-				panic(err)
+				fmt.Println(err)
 			}
 
 		}

@@ -3,6 +3,7 @@ package syslog
 import (
 	"crypto/x509"
 	"errors"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 type Drain struct {
 	Transport string `yaml:"transport"`
 	Address   string `yaml:"address"`
-	CA        []byte `yaml:"ca"`
+	CA        string `yaml:"ca"`
 }
 
 type Drainer interface {
@@ -32,8 +33,13 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string) (*drainer
 	var logger *sl.Logger
 	var certPool *x509.CertPool
 	if len(drain.CA) != 0 {
+		ca, err := ioutil.ReadFile(drain.CA)
+		if err != nil {
+			errorLogger.Printf("Error reading ca certificate: %s \n", err.Error())
+			return nil, err
+		}
 		certPool = x509.NewCertPool()
-		certPool.AppendCertsFromPEM(drain.CA)
+		certPool.AppendCertsFromPEM(ca)
 	}
 
 	for err != nil {

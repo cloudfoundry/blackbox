@@ -497,26 +497,23 @@ var _ = Describe("Blackbox", func() {
 		})
 
 		FIt("can send messages using tls", func() {
-			ca, err := ioutil.ReadFile("./fixtures/server.ca")
-			Expect(err).NotTo(HaveOccurred())
 			blackboxConfig := blackbox.Config{
 				Hostname: "",
 				Syslog: blackbox.SyslogConfig{
 					Destination: syslog.Drain{
 						Transport: "tls",
 						Address:   address,
-						CA:        ca,
+						CA:        "./fixtures/server.ca",
 					},
 					SourceDir: logDir,
 				},
 			}
 			blackboxRunner.StartWithConfig(blackboxConfig, 1)
-			logFile.WriteString("\n")
 			logFile.WriteString("hello\n")
 			logFile.Sync()
 			logFile.Close()
 
-			Eventually(buffer).Should(gbytes.Say("hello"))
+			Eventually(buffer, "5s").Should(gbytes.Say("hello"))
 
 			blackboxRunner.Stop()
 		})
