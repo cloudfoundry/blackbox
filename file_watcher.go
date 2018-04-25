@@ -91,7 +91,7 @@ func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileI
 }
 
 func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
-	drainer, err := syslog.NewDrainer(f.drain, f.hostname)
+	drainer, err := syslog.NewDrainer(f.logger, f.drain, f.hostname)
 	if err != nil {
 		f.logger.Fatalf("could not drain to syslog: %s\n", err)
 	}

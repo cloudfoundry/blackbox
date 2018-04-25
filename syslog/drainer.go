@@ -3,7 +3,7 @@ package syslog
 import (
 	"crypto/x509"
 	"errors"
-	"fmt"
+	"log"
 	"time"
 
 	sl "github.com/papertrail/remote_syslog2/syslog"
@@ -22,11 +22,12 @@ type Drainer interface {
 const ServerPollingInterval = 5 * time.Second
 
 type drainer struct {
-	logger   *sl.Logger
-	hostname string
+	errorLogger *log.Logger
+	logger      *sl.Logger
+	hostname    string
 }
 
-func NewDrainer(drain Drain, hostname string) (*drainer, error) {
+func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string) (*drainer, error) {
 	err := errors.New("non-nil")
 	var logger *sl.Logger
 	var certPool *x509.CertPool
@@ -47,7 +48,7 @@ func NewDrainer(drain Drain, hostname string) (*drainer, error) {
 		)
 
 		if err != nil {
-			fmt.Println(err)
+			errorLogger.Printf("Connection error: %s, Will retry in %d \n", err.Error(), ServerPollingInterval)
 			time.Sleep(ServerPollingInterval)
 		}
 	}
@@ -57,8 +58,9 @@ func NewDrainer(drain Drain, hostname string) (*drainer, error) {
 	}
 
 	return &drainer{
-		logger:   logger,
-		hostname: hostname,
+		logger:      logger,
+		hostname:    hostname,
+		errorLogger: errorLogger,
 	}, nil
 }
 
@@ -74,6 +76,7 @@ func (d *drainer) Drain(line string, tag string) error {
 
 	select {
 	case err := <-d.logger.Errors:
+		d.errorLogger.Printf("Error sending syslog packet: %s", err)
 		return err
 	default:
 		return nil

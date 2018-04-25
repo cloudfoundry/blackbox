@@ -148,7 +148,7 @@ var _ = Describe("Blackbox", func() {
 			blackboxRunner.Stop()
 		})
 
-		It("tracks logs in multiple files in source directory", func() {
+		It("tracks logs in multiple files in subdirectories of source directory", func() {
 			anotherLogFile, err := os.OpenFile(
 				filepath.Join(logDir, tagName, "another-tail.log"),
 				os.O_WRONLY|os.O_CREATE|os.O_TRUNC,

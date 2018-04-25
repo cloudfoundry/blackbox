@@ -15,5 +15,5 @@ if not_installed ginkgo; then
 fi
 
 cd $blackbox_dir
-ginkgo -r -p
+ginkgo -r -p "$@"
 
