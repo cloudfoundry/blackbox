@@ -188,12 +188,7 @@ var _ = Describe("Blackbox", func() {
 			)
 			Expect(err).NotTo(HaveOccurred())
 			defer anotherLogFile.Close()
-
-			notALogFile, err := os.OpenFile(
-				filepath.Join(logDir, tagName, "not-a-log-file.log.1"),
-				os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
-				os.ModePerm,
-			)
+			notALogFile, err := os.OpenFile(filepath.Join(logDir, tagName, "not-a-log-file.log.1"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 			Expect(err).NotTo(HaveOccurred())
 			defer notALogFile.Close()
 
@@ -478,6 +473,52 @@ var _ = Describe("Blackbox", func() {
 				session.Signal(os.Interrupt)
 				session.Wait()
 			}
+		})
+	})
+	Context("When the server uses tls", func() {
+		var address string
+		var buffer *gbytes.Buffer
+		var tlsserver TLSSyslogServer
+		var blackboxRunner *BlackboxRunner
+
+		BeforeEach(func() {
+			address = fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+			buffer = gbytes.NewBuffer()
+			tlsserver = TLSSyslogServer{
+				Addr:   address,
+				Buffer: buffer,
+			}
+			tlsserver.Run()
+			blackboxRunner = NewBlackboxRunner(blackboxPath)
+		})
+
+		AfterEach(func() {
+			tlsserver.Stop()
+		})
+
+		FIt("can send messages using tls", func() {
+			ca, err := ioutil.ReadFile("./fixtures/server.ca")
+			Expect(err).NotTo(HaveOccurred())
+			blackboxConfig := blackbox.Config{
+				Hostname: "",
+				Syslog: blackbox.SyslogConfig{
+					Destination: syslog.Drain{
+						Transport: "tls",
+						Address:   address,
+						CA:        ca,
+					},
+					SourceDir: logDir,
+				},
+			}
+			blackboxRunner.StartWithConfig(blackboxConfig, 1)
+			logFile.WriteString("\n")
+			logFile.WriteString("hello\n")
+			logFile.Sync()
+			logFile.Close()
+
+			Eventually(buffer).Should(gbytes.Say("hello"))
+
+			blackboxRunner.Stop()
 		})
 	})
 })

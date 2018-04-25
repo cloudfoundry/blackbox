@@ -1,7 +1,9 @@
 package syslog
 
 import (
+	"crypto/x509"
 	"errors"
+	"fmt"
 	"time"
 
 	sl "github.com/papertrail/remote_syslog2/syslog"
@@ -10,7 +12,7 @@ import (
 type Drain struct {
 	Transport string `yaml:"transport"`
 	Address   string `yaml:"address"`
-	CA        string `yaml:"ca"`
+	CA        []byte `yaml:"ca"`
 }
 
 type Drainer interface {
@@ -27,19 +29,25 @@ type drainer struct {
 func NewDrainer(drain Drain, hostname string) (*drainer, error) {
 	err := errors.New("non-nil")
 	var logger *sl.Logger
+	var certPool *x509.CertPool
+	if len(drain.CA) != 0 {
+		certPool = x509.NewCertPool()
+		certPool.AppendCertsFromPEM(drain.CA)
+	}
 
 	for err != nil {
 		logger, err = sl.Dial(
 			hostname,
 			drain.Transport,
 			drain.Address,
-			nil,
+			certPool,
 			30*time.Second,
 			30*time.Second,
 			99990,
 		)
 
 		if err != nil {
+			fmt.Println(err)
 			time.Sleep(ServerPollingInterval)
 		}
 	}
