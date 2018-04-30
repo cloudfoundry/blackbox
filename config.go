@@ -14,9 +14,9 @@ type SyslogConfig struct {
 }
 
 type Config struct {
-	Hostname string `yaml:"hostname"`
-
-	Syslog SyslogConfig `yaml:"syslog"`
+	Hostname       string       `yaml:"hostname"`
+	StructuredData string       `yaml:"structured_data"`
+	Syslog         SyslogConfig `yaml:"syslog"`
 }
 
 func LoadConfig(path string) (*Config, error) {

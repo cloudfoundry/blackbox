@@ -114,6 +114,20 @@ func TestPacketGenerate(t *testing.T) {
 			0,
 			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc rs2 - - newline:' '. nullbyte:' '. carriage return:' '.",
 		},
+		{
+			// with Structured Data
+			Packet{
+				Severity:       SevNotice,
+				Facility:       LogLocal4,
+				Time:           parseTime("2003-08-24T05:14:15.000003-07:00"),
+				Hostname:       "192.0.2.1",
+				Tag:            "myproc",
+				StructuredData: "[StructuredData@1 test=\"2\"]",
+				Message:        `%% It's time to make the do-nuts.`,
+			},
+			0,
+			"<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc rs2 - [StructuredData@1 test=\"2\"] %% It's time to make the do-nuts.",
+		},
 	}
 	for _, test := range tests {
 		out := test.packet.Generate(test.max_size)

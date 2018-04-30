@@ -36,7 +36,7 @@ func main() {
 	running := ifrit.Invoke(sigmon.New(group))
 
 	go func() {
-		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, group.Client(), config.Syslog.Destination, config.Hostname)
+		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, group.Client(), config.Syslog.Destination, config.Hostname, config.StructuredData)
 		fileWatcher.Watch()
 	}()
 

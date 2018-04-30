@@ -70,9 +70,8 @@ var _ = Describe("Blackbox", func() {
 			blackboxRunner = NewBlackboxRunner(blackboxPath)
 		})
 
-		buildConfigHostname := func(hostname string, dirToWatch string) blackbox.Config {
+		buildConfig := func(dirToWatch string) blackbox.Config {
 			return blackbox.Config{
-				Hostname: hostname,
 				Syslog: blackbox.SyslogConfig{
 					Destination: syslog.Drain{
 						Transport: "udp",
@@ -81,10 +80,6 @@ var _ = Describe("Blackbox", func() {
 					SourceDir: dirToWatch,
 				},
 			}
-		}
-
-		buildConfig := func(dirToWatch string) blackbox.Config {
-			return buildConfigHostname("", dirToWatch)
 		}
 
 		AfterEach(func() {
@@ -115,7 +110,8 @@ var _ = Describe("Blackbox", func() {
 		})
 
 		It("can have a custom hostname", func() {
-			config := buildConfigHostname("fake-hostname", logDir)
+			config := buildConfig(logDir)
+			config.Hostname = "fake-hostname"
 			blackboxRunner.StartWithConfig(config, 1)
 
 			logFile.WriteString("hello\n")
@@ -126,6 +122,23 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Content).To(ContainSubstring("hello"))
 			Expect(message.Content).To(ContainSubstring("test-tag"))
 			Expect(message.Content).To(ContainSubstring("fake-hostname"))
+
+			blackboxRunner.Stop()
+		})
+
+		It("can have structured data", func() {
+			config := buildConfig(logDir)
+			config.StructuredData = "[StructuredData@1 test=\"1\"]"
+			blackboxRunner.StartWithConfig(config, 1)
+
+			logFile.WriteString("hello\n")
+			logFile.Sync()
+
+			var message *sl.Message
+			Eventually(inbox.Messages, "5s").Should(Receive(&message))
+			Expect(message.Content).To(ContainSubstring("hello"))
+			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring("[StructuredData@1 test=\"1\"]"))
 
 			blackboxRunner.Stop()
 		})
