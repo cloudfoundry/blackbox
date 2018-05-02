@@ -12,6 +12,7 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - get: blackbox
+    trigger: true
   - task: test-blackbox
     config:
       platform: linux
