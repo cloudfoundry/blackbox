@@ -1,0 +1,46 @@
+---
+resources:
+- name: blackbox
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/blackbox.git
+
+jobs:
+- name: tests
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - get: blackbox
+  - task: test-blackbox
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: golang
+      inputs:
+      - name: blackbox
+      run:
+        path: bash
+        args:
+          - -c
+          - |
+            #!/bin/bash
+
+            set -e
+
+            workspace=$PWD
+            mkdir -p $GOPATH/src/github.com/cloudfoundry
+            ln -s $workspace/blackbox $GOPATH/src/github.com/cloudfoundry/blackbox
+            go get github.com/onsi/ginkgo
+            go get github.com/hpcloud/tail
+            go get github.com/onsi/gomega
+            go get github.com/tedsuo/ifrit
+            go get github.com/ziutek/syslog
+            go get gopkg.in/yaml.v2
+            go install github.com/onsi/ginkgo/ginkgo
+
+            pushd blackbox
+              ./scripts/test
+            popd
