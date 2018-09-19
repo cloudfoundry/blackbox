@@ -110,6 +110,24 @@ var _ = Describe("Blackbox", func() {
 			blackboxRunner.Stop()
 		})
 
+		Context("when logging with filename is activated", func() {
+			It("logs with <subdirectory>/<filename> as tag", func() {
+				config := buildConfig(logDir)
+				config.Syslog.LogFilename = true
+				blackboxRunner.StartWithConfig(config, 1)
+
+				logFile.WriteString("hello\n")
+				logFile.Sync()
+				logFile.Close()
+
+				var message *sl.Message
+				Eventually(inbox.Messages, "5s").Should(Receive(&message))
+				Expect(message.Content).To(ContainSubstring("test-tag/tail.log"))
+
+				blackboxRunner.Stop()
+			})
+		})
+
 		It("can have a custom hostname", func() {
 			config := buildConfig(logDir)
 			config.Hostname = "fake-hostname"

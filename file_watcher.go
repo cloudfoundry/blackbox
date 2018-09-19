@@ -18,6 +18,7 @@ type fileWatcher struct {
 	logger *log.Logger
 
 	sourceDir          string
+	logFilename        bool
 	dynamicGroupClient grouper.DynamicClient
 	hostname           string
 	structuredData     string
@@ -29,6 +30,7 @@ type fileWatcher struct {
 func NewFileWatcher(
 	logger *log.Logger,
 	sourceDir string,
+	logFilename bool,
 	dynamicGroupClient grouper.DynamicClient,
 	drain syslog.Drain,
 	hostname string,
@@ -38,6 +40,7 @@ func NewFileWatcher(
 	return &fileWatcher{
 		logger:             logger,
 		sourceDir:          sourceDir,
+		logFilename:        logFilename,
 		dynamicGroupClient: dynamicGroupClient,
 		drain:              drain,
 		hostname:           hostname,
@@ -105,12 +108,7 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 		f.logger.Fatalf("could not drain to syslog: %s\n", err)
 	}
 
-	logfileDir := filepath.Dir(logfilePath)
-
-	tag, err := filepath.Rel(f.sourceDir, logfileDir)
-	if err != nil {
-		f.logger.Fatalf("could not compute tag from file path %s: %s\n", logfilePath, err)
-	}
+	tag := f.determineTag(logfilePath)
 
 	tailer := &Tailer{
 		Path:    logfilePath,
@@ -119,4 +117,17 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 	}
 
 	return grouper.Member{tailer.Path, tailer}
+}
+
+func (f *fileWatcher) determineTag(logfilePath string) string {
+	absolutePathForTag := filepath.Dir(logfilePath)
+	if f.logFilename {
+		absolutePathForTag = logfilePath
+	}
+	tag, err := filepath.Rel(f.sourceDir, absolutePathForTag)
+	if err != nil {
+		f.logger.Fatalf("could not compute tag from file path %s: %s\n", logfilePath, err)
+	}
+
+	return tag
 }
