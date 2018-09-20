@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -109,6 +110,7 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 	}
 
 	tag := f.determineTag(logfilePath)
+	tag = f.formatSyslogAppName(tag, logfilePath)
 
 	tailer := &Tailer{
 		Path:    logfilePath,
@@ -120,14 +122,37 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 }
 
 func (f *fileWatcher) determineTag(logfilePath string) string {
-	absolutePathForTag := filepath.Dir(logfilePath)
+	var tag string
+	var err error
 	if f.logFilename {
-		absolutePathForTag = logfilePath
+		tag, err = filepath.Rel(f.sourceDir, logfilePath)
+	} else {
+		logfileDir := filepath.Dir(logfilePath)
+		tag, err = filepath.Rel(f.sourceDir, logfileDir)
 	}
-	tag, err := filepath.Rel(f.sourceDir, absolutePathForTag)
 	if err != nil {
 		f.logger.Fatalf("could not compute tag from file path %s: %s\n", logfilePath, err)
 	}
-
 	return tag
+}
+
+func (f *fileWatcher) formatSyslogAppName(originalAppname string, logfilePath string) string {
+	//only ASCII chars from 33 to 126 are allowed
+	forbiddenCharacters := "[^!-~]+"
+
+	reg, err := regexp.Compile(forbiddenCharacters)
+	if err != nil {
+		f.logger.Fatalf("could not create regexp for sanitizing app-name %s: %s\n", logfilePath, err)
+	}
+	appname := reg.ReplaceAllString(originalAppname, "")
+
+	if len(originalAppname) != len(appname) {
+		f.logger.Printf("App-name consisted of chars outside of ASCII 33 to 126. app-name : %s, path: %s", originalAppname, logfilePath)
+	}
+
+	if len(appname) > 48 {
+		f.logger.Printf("App-name was too long. Trimmed it to 48 Characters according to syslog formating rules, app-name : %s, path: %s", originalAppname, logfilePath)
+		appname = appname[0:48]
+	}
+	return appname
 }
