@@ -21,6 +21,7 @@ type fileWatcher struct {
 	dynamicGroupClient grouper.DynamicClient
 	hostname           string
 	structuredData     string
+	excludeFilePattern string
 
 	drain syslog.Drain
 }
@@ -32,6 +33,7 @@ func NewFileWatcher(
 	drain syslog.Drain,
 	hostname string,
 	structuredData string,
+	excludeFilePattern string,
 ) *fileWatcher {
 	return &fileWatcher{
 		logger:             logger,
@@ -40,6 +42,7 @@ func NewFileWatcher(
 		drain:              drain,
 		hostname:           hostname,
 		structuredData:     structuredData,
+		excludeFilePattern: excludeFilePattern,
 	}
 }
 
@@ -74,6 +77,10 @@ func (f *fileWatcher) Watch() {
 func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileInfo) {
 	if !file.IsDir() {
 		if strings.HasSuffix(file.Name(), ".log") {
+			if matched, _ := filepath.Match(f.excludeFilePattern, file.Name()); matched {
+				f.logger.Printf("skipping log file '%s' excluded by glob: %s\n", file.Name(), f.excludeFilePattern)
+				return
+			}
 			if _, found := f.dynamicGroupClient.Get(filePath); !found {
 				f.dynamicGroupClient.Inserter() <- f.memberForFile(filePath)
 			}

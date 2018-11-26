@@ -9,8 +9,9 @@ import (
 )
 
 type SyslogConfig struct {
-	Destination syslog.Drain `yaml:"destination"`
-	SourceDir   string       `yaml:"source_dir"`
+	Destination        syslog.Drain `yaml:"destination"`
+	SourceDir          string       `yaml:"source_dir"`
+	ExcludeFilePattern string       `yaml:"exclude_file_pattern"`
 }
 
 type Config struct {
