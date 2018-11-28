@@ -78,7 +78,7 @@ var _ = Describe("Blackbox", func() {
 						Address:   syslogServer.Addr,
 					},
 					SourceDir:          dirToWatch,
-					ExcludeFilePattern: "*[0-9].log",
+					ExcludeFilePattern: "*.[0-9].log",
 				},
 			}
 		}

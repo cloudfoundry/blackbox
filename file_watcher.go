@@ -78,7 +78,6 @@ func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileI
 	if !file.IsDir() {
 		if strings.HasSuffix(file.Name(), ".log") {
 			if matched, _ := filepath.Match(f.excludeFilePattern, file.Name()); matched {
-				f.logger.Printf("skipping log file '%s' excluded by glob: %s\n", file.Name(), f.excludeFilePattern)
 				return
 			}
 			if _, found := f.dynamicGroupClient.Get(filePath); !found {
