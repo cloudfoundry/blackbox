@@ -77,7 +77,8 @@ var _ = Describe("Blackbox", func() {
 						Transport: "udp",
 						Address:   syslogServer.Addr,
 					},
-					SourceDir: dirToWatch,
+					SourceDir:          dirToWatch,
+					ExcludeFilePattern: "*.[0-9].log",
 				},
 			}
 		}
@@ -202,6 +203,51 @@ var _ = Describe("Blackbox", func() {
 			Expect(err).NotTo(HaveOccurred())
 			defer anotherLogFile.Close()
 			notALogFile, err := os.OpenFile(filepath.Join(logDir, tagName, "not-a-log-file.log.1"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+			Expect(err).NotTo(HaveOccurred())
+			defer notALogFile.Close()
+
+			config := buildConfig(logDir)
+			blackboxRunner.StartWithConfig(config, 2)
+
+			logFile.WriteString("hello\n")
+			logFile.Sync()
+
+			notALogFile.WriteString("john cena\n")
+			notALogFile.Sync()
+
+			var message *sl.Message
+			Eventually(inbox.Messages, "30s").Should(Receive(&message))
+			Expect(message.Content).To(ContainSubstring("hello"))
+			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(Hostname()))
+
+			Consistently(inbox.Messages).ShouldNot(Receive())
+
+			anotherLogFile.WriteString("hello from the other side\n")
+			anotherLogFile.Sync()
+
+			notALogFile.WriteString("my time is now\n")
+			notALogFile.Sync()
+
+			Eventually(inbox.Messages, "5s").Should(Receive(&message))
+			Expect(message.Content).To(ContainSubstring("hello from the other side"))
+			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(Hostname()))
+
+			Consistently(inbox.Messages).ShouldNot(Receive())
+
+			blackboxRunner.Stop()
+		})
+
+		It("skips files matching exclude_file_pattern", func() {
+			anotherLogFile, err := os.OpenFile(
+				filepath.Join(logDir, tagName, "another-tail.log"),
+				os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+				os.ModePerm,
+			)
+			Expect(err).NotTo(HaveOccurred())
+			defer anotherLogFile.Close()
+			notALogFile, err := os.OpenFile(filepath.Join(logDir, tagName, "excluded.1.log"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 			Expect(err).NotTo(HaveOccurred())
 			defer notALogFile.Close()
 
