@@ -24,6 +24,7 @@ syslog:
     address: logs.example.com:1234
 
   source_dir: /path/to/log-dir
+  log_filename: false
 ```
 
 Consider the case where `log-dir` has the following structure:
@@ -39,6 +40,8 @@ Consider the case where `log-dir` has the following structure:
 ```
 
 Any new lines written to `app1/stdout.log` and `app1/stderr.log` get sent to syslog tagged as `app1`, while new lines written to `app2/foo.log` and `app2/bar.log` get sent to syslog tagged as `app2`.
+
+If `log_filename` is set to `true` then the filename is included in the tag. For example, new lines written to `app1/stdout.log` get sent to syslog tagged as `app1/stdout.log`.
 
 Currently the priority and facility are hardcoded to `INFO` and `user`.
 

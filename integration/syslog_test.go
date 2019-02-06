@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -27,8 +28,11 @@ import (
 var _ = Describe("Blackbox", func() {
 	var (
 		logDir  string
-		tagName string
 		logFile *os.File
+	)
+	const (
+		logfileName = "tail.log"
+		tagName     = "test-tag"
 	)
 
 	BeforeEach(func() {
@@ -36,12 +40,11 @@ var _ = Describe("Blackbox", func() {
 		logDir, err = ioutil.TempDir("", "syslog-test")
 		Expect(err).NotTo(HaveOccurred())
 
-		tagName = "test-tag"
 		err = os.Mkdir(filepath.Join(logDir, tagName), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
 		logFile, err = os.OpenFile(
-			filepath.Join(logDir, tagName, "tail.log"),
+			filepath.Join(logDir, tagName, logfileName),
 			os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
 			os.ModePerm,
 		)
@@ -99,15 +102,92 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			Eventually(inbox.Messages, "2s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("world"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			blackboxRunner.Stop()
+		})
+
+		Context("when logging with filename is activated", func() {
+			It("logs with <subdirectory>/<filename> as tag", func() {
+				config := buildConfig(logDir)
+				config.Syslog.LogFilename = true
+				blackboxRunner.StartWithConfig(config, 1)
+
+				logFile.WriteString("hello\n")
+				logFile.Sync()
+				logFile.Close()
+
+				var message *sl.Message
+				Eventually(inbox.Messages, "5s").Should(Receive(&message))
+				Expect(message.Content).To(ContainSubstring(tagName + "/" + logfileName))
+
+				blackboxRunner.Stop()
+			})
+		})
+
+		Context("tag name violates the constraints of the syslog message format", func() {
+			It("cuts the tag name at 48 characters", func() {
+				name50Chars := strings.Repeat("a", 50)
+				expectedTagName48Chars := strings.Repeat("a", 48)
+
+				err := os.Mkdir(filepath.Join(logDir, name50Chars), os.ModePerm)
+				Expect(err).NotTo(HaveOccurred())
+				logfile, err := os.OpenFile(
+					filepath.Join(logDir, name50Chars, "example.log"),
+					os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+					os.ModePerm,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				config := buildConfig(logDir)
+				blackboxRunner.StartWithConfig(config, 1)
+
+				var message *sl.Message
+
+				logfile.WriteString("hello \n")
+				logfile.Sync()
+				logfile.Close()
+
+				Eventually(inbox.Messages, "5s").Should(Receive(&message))
+				Expect(message.Content).ToNot(ContainSubstring(name50Chars))
+				Expect(message.Content).To(ContainSubstring(" " + expectedTagName48Chars + " "))
+
+				blackboxRunner.Stop()
+			})
+			It("removes all characters that are not between ASCII 33 - 126 from the tag name", func() {
+				specialCharsName := "ab c§d "
+				expectedNoSpecialCharsName := "abcd"
+
+				err := os.Mkdir(filepath.Join(logDir, specialCharsName), os.ModePerm)
+				Expect(err).NotTo(HaveOccurred())
+
+				logfile, err := os.OpenFile(
+					filepath.Join(logDir, specialCharsName, "example.log"),
+					os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+					os.ModePerm,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				config := buildConfig(logDir)
+				blackboxRunner.StartWithConfig(config, 1)
+
+				logfile.WriteString("hello \n")
+				logfile.Sync()
+				logfile.Close()
+
+				var message *sl.Message
+				Eventually(inbox.Messages, "5s").Should(Receive(&message))
+				Expect(message.Content).ToNot(ContainSubstring(specialCharsName))
+				Expect(message.Content).To(ContainSubstring(" " + expectedNoSpecialCharsName + " "))
+
+				blackboxRunner.Stop()
+			})
 		})
 
 		It("can have a custom hostname", func() {
@@ -121,7 +201,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring("fake-hostname"))
 
 			blackboxRunner.Stop()
@@ -138,7 +218,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring("[StructuredData@1 test=\"1\"]"))
 
 			blackboxRunner.Stop()
@@ -157,7 +237,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "2s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 
 			blackboxRunner.Stop()
 		})
@@ -180,7 +260,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			anotherLogFile.WriteString("hello from the other side\n")
@@ -188,7 +268,7 @@ var _ = Describe("Blackbox", func() {
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			blackboxRunner.Stop()
@@ -218,7 +298,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "30s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			Consistently(inbox.Messages).ShouldNot(Receive())
@@ -231,7 +311,7 @@ var _ = Describe("Blackbox", func() {
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			Consistently(inbox.Messages).ShouldNot(Receive())
@@ -306,7 +386,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			anotherLogFile.WriteString("hello from the other side\n")
@@ -341,7 +421,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			By("keeping track of old files")
@@ -350,7 +430,7 @@ var _ = Describe("Blackbox", func() {
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			blackboxRunner.Stop()
@@ -367,17 +447,17 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
-			err := os.Rename(filepath.Join(logDir, tagName, "tail.log"), filepath.Join(logDir, tagName, "tail.log.1"))
+			err := os.Rename(filepath.Join(logDir, tagName, logfileName), filepath.Join(logDir, tagName, "tail.log.1"))
 			Expect(err).NotTo(HaveOccurred())
 
 			// wait for tail process to die, tailer interval is 1 sec
 			time.Sleep(2 * time.Second)
 
 			anotherLogFile, err := os.OpenFile(
-				filepath.Join(logDir, tagName, "tail.log"),
+				filepath.Join(logDir, tagName, logfileName),
 				os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
 				os.ModePerm,
 			)
@@ -392,7 +472,7 @@ var _ = Describe("Blackbox", func() {
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("bye"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			blackboxRunner.Stop()
@@ -419,7 +499,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			childLog.WriteString("child data\n")
@@ -428,7 +508,7 @@ var _ = Describe("Blackbox", func() {
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("child data"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			blackboxRunner.Stop()
@@ -452,7 +532,7 @@ var _ = Describe("Blackbox", func() {
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
-			Expect(message.Content).To(ContainSubstring("test-tag"))
+			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			blackboxRunner.Stop()

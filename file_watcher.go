@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -18,6 +19,7 @@ type fileWatcher struct {
 	logger *log.Logger
 
 	sourceDir          string
+	logFilename        bool
 	dynamicGroupClient grouper.DynamicClient
 	hostname           string
 	structuredData     string
@@ -29,6 +31,7 @@ type fileWatcher struct {
 func NewFileWatcher(
 	logger *log.Logger,
 	sourceDir string,
+	logFilename bool,
 	dynamicGroupClient grouper.DynamicClient,
 	drain syslog.Drain,
 	hostname string,
@@ -38,6 +41,7 @@ func NewFileWatcher(
 	return &fileWatcher{
 		logger:             logger,
 		sourceDir:          sourceDir,
+		logFilename:        logFilename,
 		dynamicGroupClient: dynamicGroupClient,
 		drain:              drain,
 		hostname:           hostname,
@@ -105,12 +109,8 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 		f.logger.Fatalf("could not drain to syslog: %s\n", err)
 	}
 
-	logfileDir := filepath.Dir(logfilePath)
-
-	tag, err := filepath.Rel(f.sourceDir, logfileDir)
-	if err != nil {
-		f.logger.Fatalf("could not compute tag from file path %s: %s\n", logfilePath, err)
-	}
+	tag := f.determineTag(logfilePath)
+	tag = f.formatSyslogAppName(tag, logfilePath)
 
 	tailer := &Tailer{
 		Path:    logfilePath,
@@ -119,4 +119,40 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 	}
 
 	return grouper.Member{tailer.Path, tailer}
+}
+
+func (f *fileWatcher) determineTag(logfilePath string) string {
+	var tag string
+	var err error
+	if f.logFilename {
+		tag, err = filepath.Rel(f.sourceDir, logfilePath)
+	} else {
+		logfileDir := filepath.Dir(logfilePath)
+		tag, err = filepath.Rel(f.sourceDir, logfileDir)
+	}
+	if err != nil {
+		f.logger.Fatalf("could not compute tag from file path %s: %s\n", logfilePath, err)
+	}
+	return tag
+}
+
+func (f *fileWatcher) formatSyslogAppName(originalAppname string, logfilePath string) string {
+	//only ASCII chars from 33 to 126 are allowed
+	forbiddenCharacters := "[^!-~]+"
+
+	reg, err := regexp.Compile(forbiddenCharacters)
+	if err != nil {
+		f.logger.Fatalf("could not create regexp for sanitizing app-name %s: %s\n", logfilePath, err)
+	}
+	appname := reg.ReplaceAllString(originalAppname, "")
+
+	if len(originalAppname) != len(appname) {
+		f.logger.Printf("App-name consisted of chars outside of ASCII 33 to 126. app-name : %s, path: %s", originalAppname, logfilePath)
+	}
+
+	if len(appname) > 48 {
+		f.logger.Printf("App-name was too long. Trimmed it to 48 Characters according to syslog formating rules, app-name : %s, path: %s", originalAppname, logfilePath)
+		appname = appname[0:48]
+	}
+	return appname
 }
