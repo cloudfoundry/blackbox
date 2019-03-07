@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	yaml "github.com/bosh-tools/bosh-ext-cli/src/gopkg.in/yaml.v2"
 	"github.com/cloudfoundry/blackbox/syslog"
+	"gopkg.in/yaml.v2"
 )
 
 type SyslogConfig struct {
