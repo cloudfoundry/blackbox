@@ -2,8 +2,11 @@ package integration
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"strings"
@@ -20,6 +23,18 @@ type TLSSyslogServer struct {
 }
 
 func (s *TLSSyslogServer) Run() error {
+	pool, err := x509.SystemCertPool()
+	if pool == nil {
+		pool = x509.NewCertPool()
+	}
+	ca_cert, err := ioutil.ReadFile("./fixtures/ca.crt")
+	if err != nil {
+		return err
+	}
+	if ok := pool.AppendCertsFromPEM(ca_cert); !ok {
+		return errors.New("failed to apped CA")
+	}
+
 	// Listen for incoming connections.
 	cer, err := tls.LoadX509KeyPair("./fixtures/server.crt", "./fixtures/server.key")
 	if err != nil {
@@ -27,7 +42,7 @@ func (s *TLSSyslogServer) Run() error {
 		return err
 	}
 
-	config := &tls.Config{Certificates: []tls.Certificate{cer}}
+	config := &tls.Config{RootCAs: pool, Certificates: []tls.Certificate{cer}}
 	s.l, err = tls.Listen("tcp", s.Addr, config)
 	if err != nil {
 		return err

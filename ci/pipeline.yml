@@ -1,0 +1,17 @@
+---
+resources:
+- name: blackbox
+  type: git
+  source:
+    branch: with-updated-certs
+    uri: https://github.com/cloudfoundry/blackbox.git
+
+jobs:
+- name: tests
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - get: blackbox
+    trigger: true
+  - task: test-blackbox
+    file: ./blackbox/ci/test-task.yml

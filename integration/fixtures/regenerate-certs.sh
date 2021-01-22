@@ -8,7 +8,7 @@ pushd "$this_dir"
 
 rm -rf out
 certstrap init --common-name "ca" --passphrase ""
-certstrap request-cert --common-name "server" --ip "127.0.0.1" --passphrase ""
+certstrap request-cert --common-name "server" --domain "localhost" --ip "127.0.0.1" --passphrase ""
 certstrap sign server --CA "ca"
 
 mv -f out/* ./

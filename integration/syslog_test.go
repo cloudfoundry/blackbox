@@ -642,7 +642,7 @@ var _ = Describe("Blackbox", func() {
 					Destination: syslog.Drain{
 						Transport: "tls",
 						Address:   address,
-						CA:        "./fixtures/server.ca",
+						CA:        "./fixtures/ca.crt",
 					},
 					SourceDir: logDir,
 				},
