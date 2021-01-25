@@ -116,6 +116,7 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 		Path:    logfilePath,
 		Tag:     tag,
 		Drainer: drainer,
+		Logger:  f.logger,
 	}
 
 	return grouper.Member{tailer.Path, tailer}

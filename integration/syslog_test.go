@@ -90,6 +90,42 @@ var _ = Describe("Blackbox", func() {
 			syslogServer.Stop()
 		})
 
+		Context("When using RFC3339 logging format", func() {
+			JustBeforeEach(func() {
+				buildConfig = func(dirToWatch string) blackbox.Config {
+					return blackbox.Config{
+						UseRFC3339: true,
+						Syslog: blackbox.SyslogConfig{
+							Destination: syslog.Drain{
+								Transport: "udp",
+								Address:   syslogServer.Addr,
+							},
+							SourceDir:          dirToWatch,
+							ExcludeFilePattern: "*.[0-9].log",
+						},
+					}
+				}
+			})
+
+			It("logs with requested format", func() {
+				config := buildConfig(logDir)
+				blackboxRunner.StartWithConfig(config, 1)
+
+				logFile.WriteString("hello\n")
+				logFile.Sync()
+				logFile.Close()
+
+				var message *sl.Message
+				Eventually(inbox.Messages, "5s").Should(Receive(&message))
+				Expect(message.Content).To(ContainSubstring("hello"))
+				Expect(message.Content).To(ContainSubstring(tagName))
+				Expect(message.Content).To(ContainSubstring(Hostname()))
+				Expect(message.Content).To(MatchRegexp(`.*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d*Z.*`))
+
+				blackboxRunner.Stop()
+			})
+		})
+
 		It("logs any new lines of a file in source directory to syslog with subdirectory name as tag", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
