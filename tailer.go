@@ -15,6 +15,7 @@ type Tailer struct {
 	Path    string
 	Tag     string
 	Drainer syslog.Drainer
+	Logger  *log.Logger
 }
 
 func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error {
@@ -28,6 +29,7 @@ func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error
 			Offset: 0,
 			Whence: os.SEEK_END,
 		},
+		Logger: tailer.Logger,
 	})
 
 	if err != nil {
