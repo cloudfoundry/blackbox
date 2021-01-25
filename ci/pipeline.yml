@@ -3,7 +3,7 @@ resources:
 - name: blackbox
   type: git
   source:
-    branch: with-updated-certs
+    branch: master
     uri: https://github.com/cloudfoundry/blackbox.git
 
 jobs:
@@ -14,4 +14,4 @@ jobs:
   - get: blackbox
     trigger: true
   - task: test-blackbox
-    file: ./blackbox/ci/test-task.yml
+    file: blackbox/ci/test-task.yml
