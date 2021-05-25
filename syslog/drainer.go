@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"time"
-
-	sl "github.com/papertrail/remote_syslog2/syslog"
 )
 
 type Drain struct {
@@ -24,14 +22,14 @@ const ServerPollingInterval = 5 * time.Second
 
 type drainer struct {
 	errorLogger    *log.Logger
-	logger         *sl.Logger
+	logger         *Logger
 	hostname       string
 	structuredData string
 }
 
 func NewDrainer(errorLogger *log.Logger, drain Drain, hostname, structuredData string) (*drainer, error) {
 	err := errors.New("non-nil")
-	var logger *sl.Logger
+	var logger *Logger
 	var certPool *x509.CertPool
 	if len(drain.CA) != 0 {
 		ca, err := ioutil.ReadFile(drain.CA)
@@ -44,7 +42,7 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname, structuredData s
 	}
 
 	for err != nil {
-		logger, err = sl.Dial(
+		logger, err = Dial(
 			hostname,
 			drain.Transport,
 			drain.Address,
@@ -73,9 +71,9 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname, structuredData s
 }
 
 func (d *drainer) Drain(line string, tag string) error {
-	d.logger.Packets <- sl.Packet{
-		Severity:       sl.SevInfo,
-		Facility:       sl.LogUser,
+	d.logger.Packets <- Packet{
+		Severity:       SevInfo,
+		Facility:       LogUser,
 		StructuredData: d.structuredData,
 		Hostname:       d.hostname,
 		Tag:            tag,

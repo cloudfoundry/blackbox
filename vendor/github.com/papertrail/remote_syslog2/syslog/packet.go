@@ -6,15 +6,14 @@ import (
 	"time"
 )
 
-// A Packet represents an RFC5424 syslog message
+// A Packet represents an RFC5425 syslog message
 type Packet struct {
-	Severity       Priority
-	Facility       Priority
-	StructuredData string
-	Hostname       string
-	Tag            string
-	Time           time.Time
-	Message        string
+	Severity Priority
+	Facility Priority
+	Hostname string
+	Tag      string
+	Time     time.Time
+	Message  string
 }
 
 // like time.RFC3339Nano but with a limit of 6 digits in the SECFRAC part
@@ -31,20 +30,13 @@ func (p Packet) cleanMessage() string {
 	return strings.Replace(s, "\x00", " ", -1)
 }
 
-func (p Packet) structuredData() string {
-	if p.StructuredData == "" {
-		return "-"
-	}
-	return p.StructuredData
-}
-
 // Generate creates a RFC5424 syslog format string for this packet.
 func (p Packet) Generate(max_size int) string {
 	ts := p.Time.Format(rfc5424time)
 	if max_size == 0 {
-		return fmt.Sprintf("<%d>1 %s %s %s rs2 - %s %s", p.Priority(), ts, p.Hostname, p.Tag, p.structuredData(), p.cleanMessage())
+		return fmt.Sprintf("<%d>1 %s %s %s - - - %s", p.Priority(), ts, p.Hostname, p.Tag, p.cleanMessage())
 	} else {
-		msg := fmt.Sprintf("<%d>1 %s %s %s rs2 - %s %s", p.Priority(), ts, p.Hostname, p.Tag, p.structuredData(), p.cleanMessage())
+		msg := fmt.Sprintf("<%d>1 %s %s %s - - - %s", p.Priority(), ts, p.Hostname, p.Tag, p.cleanMessage())
 		if len(msg) > max_size {
 			return msg[0:max_size]
 		} else {
@@ -63,7 +55,7 @@ func Parse(line string) (Packet, error) {
 		tag      string
 	)
 
-	splitLine := strings.Split(line, " rs2 - - ")
+	splitLine := strings.Split(line, " - - - ")
 	if len(splitLine) != 2 {
 		return packet, fmt.Errorf("couldn't parse %s", line)
 	}
