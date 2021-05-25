@@ -19,7 +19,7 @@ func TestIntegration(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	var err error
-	blackboxPath, err = gexec.Build("github.com/cloudfoundry/blackbox/cmd/blackbox")
+	blackboxPath, err = gexec.Build("code.cloudfoundry.org/blackbox/cmd/blackbox")
 	Expect(err).NotTo(HaveOccurred())
 })
 

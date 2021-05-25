@@ -11,7 +11,7 @@ import (
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
 
-	"github.com/cloudfoundry/blackbox"
+	"code.cloudfoundry.org/blackbox"
 )
 
 var configPath = flag.String(

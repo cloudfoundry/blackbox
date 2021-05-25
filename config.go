@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/cloudfoundry/blackbox/syslog"
+	"code.cloudfoundry.org/blackbox/syslog"
 	"gopkg.in/yaml.v2"
 )
 

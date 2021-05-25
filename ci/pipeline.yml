@@ -4,7 +4,7 @@ resources:
   type: git
   source:
     branch: master
-    uri: https://github.com/cloudfoundry/blackbox.git
+    uri: https://code.cloudfoundry.org/blackbox.git
 
 jobs:
 - name: tests

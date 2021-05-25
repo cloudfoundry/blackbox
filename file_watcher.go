@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry/blackbox/syslog"
+	"code.cloudfoundry.org/blackbox/syslog"
 	"github.com/tedsuo/ifrit/grouper"
 )
 

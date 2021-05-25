@@ -3,11 +3,9 @@ module code.cloudfoundry.org/blackbox
 go 1.16
 
 require (
-	github.com/cloudfoundry/blackbox v0.0.0-20210125191431-22818199f26a
 	github.com/hpcloud/tail v1.0.0
 	github.com/onsi/ginkgo v1.16.2
 	github.com/onsi/gomega v1.12.0
-	github.com/papertrail/remote_syslog2 v0.0.0-20190614180052-09062fc2b02a // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tedsuo/ifrit v0.0.0-20191009134036-9a97d0632f00
 	github.com/ziutek/syslog v0.0.0-20180426113420-8a9fdf1a8529

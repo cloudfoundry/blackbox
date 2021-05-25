@@ -1,8 +1,3 @@
-# github.com/cloudfoundry/blackbox v0.0.0-20210125191431-22818199f26a
-## explicit
-github.com/cloudfoundry/blackbox
-github.com/cloudfoundry/blackbox/integration
-github.com/cloudfoundry/blackbox/syslog
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.9
@@ -58,9 +53,6 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
-# github.com/papertrail/remote_syslog2 v0.0.0-20190614180052-09062fc2b02a
-## explicit
-github.com/papertrail/remote_syslog2/syslog
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.7.0
