@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hpcloud/tail"
-	"github.com/hpcloud/tail/watch"
+	"github.com/nxadm/tail"
+	"github.com/nxadm/tail/watch"
 
 	"code.cloudfoundry.org/blackbox/syslog"
 )
