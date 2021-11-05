@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -98,7 +97,7 @@ func (runner *BlackboxRunner) StartWithConfig(config blackbox.Config, tailerCoun
 			Name:          "blackbox",
 			Command:       blackboxCmd,
 			AnsiColorCode: "90m",
-			StartCheck:    "Seeked" + strings.Repeat(".*\\n.*Seeked", tailerCount-1),
+			StartCheck:    "Start tail...",
 			Cleanup: func() {
 				os.Remove(configPath)
 			},

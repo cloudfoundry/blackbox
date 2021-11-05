@@ -120,7 +120,7 @@ var _ = Describe("Blackbox", func() {
 				Expect(message.Content).To(ContainSubstring("hello"))
 				Expect(message.Content).To(ContainSubstring(tagName))
 				Expect(message.Content).To(ContainSubstring(Hostname()))
-				Expect(message.Content).To(MatchRegexp(`.*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d*Z.*`))
+				Expect(message.Content).To(MatchRegexp(`.*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d*[Z\+].*`))
 
 				blackboxRunner.Stop()
 			})
@@ -611,7 +611,7 @@ var _ = Describe("Blackbox", func() {
 				Buffer: buffer,
 			})
 
-			Eventually(session.Err, "10s").Should(gbytes.Say("Seeked"))
+			Eventually(session.Err, "10s").Should(gbytes.Say("Start tail..."))
 
 			logFile.WriteString("hello\n")
 			logFile.WriteString("world\n")

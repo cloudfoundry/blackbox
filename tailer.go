@@ -21,6 +21,7 @@ type Tailer struct {
 func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error {
 	watch.POLL_DURATION = 1 * time.Second
 
+	tailer.Logger.Printf("Start tail...")
 	t, err := tail.TailFile(tailer.Path, tail.Config{
 		Follow: true,
 		ReOpen: true,
