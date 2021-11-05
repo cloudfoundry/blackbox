@@ -18,7 +18,7 @@ run:
       ln -s $workspace/blackbox $GOPATH/src/code.cloudfoundry.org/blackbox
       go get -u golang.org/x/tools/...
       go get github.com/onsi/ginkgo
-      go get github.com/hpcloud/tail
+      go get github.com/nxadm/tail
       go get github.com/onsi/gomega
       go get github.com/tedsuo/ifrit
       go get github.com/ziutek/syslog
