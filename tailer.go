@@ -53,6 +53,4 @@ func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error
 			return t.Stop()
 		}
 	}
-
-	return nil
 }

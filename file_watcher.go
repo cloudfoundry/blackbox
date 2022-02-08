@@ -119,7 +119,7 @@ func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
 		Logger:  f.logger,
 	}
 
-	return grouper.Member{tailer.Path, tailer}
+	return grouper.Member{Name: tailer.Path, Runner: tailer}
 }
 
 func (f *fileWatcher) determineTag(logfilePath string) string {

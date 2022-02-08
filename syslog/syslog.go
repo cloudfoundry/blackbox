@@ -186,7 +186,6 @@ func (l *Logger) connect() {
 			time.Sleep(10 * time.Second)
 		}
 	}
-	panic("unreachable")
 }
 
 // Send an error to the Error channel, but don't block if nothing is listening
