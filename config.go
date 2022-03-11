@@ -16,10 +16,12 @@ type SyslogConfig struct {
 }
 
 type Config struct {
-	Hostname       string       `yaml:"hostname"`
-	StructuredData string       `yaml:"structured_data"`
-	Syslog         SyslogConfig `yaml:"syslog"`
-	UseRFC3339     bool         `yaml:"use_rfc3339"`
+	Hostname          string            `yaml:"hostname"`
+	StructuredDataID  string            `yaml:"structured_data_id"`
+	StructuredDataMap map[string]string `yaml:"structured_data_map"`
+	Syslog            SyslogConfig      `yaml:"syslog"`
+	UseRFC3339        bool              `yaml:"use_rfc3339"`
+	MaxMessageSize    int               `yaml:"max_message_size"`
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -41,6 +43,12 @@ func LoadConfig(path string) (*Config, error) {
 		}
 
 		config.Hostname = hostname
+	}
+	if config.MaxMessageSize == 0 {
+		config.MaxMessageSize = 99990
+	}
+	if config.Syslog.Destination.Transport == "udp" {
+		config.MaxMessageSize = 1019
 	}
 
 	return &config, nil

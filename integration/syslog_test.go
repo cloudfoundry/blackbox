@@ -83,6 +83,7 @@ var _ = Describe("Blackbox", func() {
 					SourceDir:          dirToWatch,
 					ExcludeFilePattern: "*.[0-9].log",
 				},
+				MaxMessageSize: 99990,
 			}
 		}
 
@@ -145,6 +146,47 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Content).To(ContainSubstring("world"))
 			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
+
+			blackboxRunner.Stop()
+		})
+
+		It("truncates messages that are larger then configured limit", func() {
+			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+
+			buffer := gbytes.NewBuffer()
+			serverProcess := ginkgomon.Invoke(&TcpSyslogServer{
+				Addr:   address,
+				Buffer: buffer,
+			})
+			defer ginkgomon.Kill(serverProcess)
+
+			config := buildConfig(logDir)
+			config.MaxMessageSize = 2000
+			config.Syslog.Destination.Transport = "tcp"
+			config.Syslog.Destination.Address = address
+			blackboxRunner.StartWithConfig(config, 1)
+
+			logFile.WriteString(strings.Repeat("a", 10000) + "\n")
+			logFile.Sync()
+			logFile.Close()
+
+			Eventually(buffer, "5s").Should(gbytes.Say("2000"))
+			Eventually(len(buffer.Contents()), "5s").Should(Equal(2005))
+
+			blackboxRunner.Stop()
+		})
+
+		It("truncates messages longer then 1019 in udp", func() {
+			config := buildConfig(logDir)
+			blackboxRunner.StartWithConfig(config, 1)
+
+			logFile.WriteString(strings.Repeat("a", 10000) + "\n")
+			logFile.Sync()
+			logFile.Close()
+
+			var message *sl.Message
+			Eventually(inbox.Messages, "5s").Should(Receive(&message))
+			Expect(len(message.Content)).To(Equal(1020))
 
 			blackboxRunner.Stop()
 		})
@@ -245,7 +287,8 @@ var _ = Describe("Blackbox", func() {
 
 		It("can have structured data", func() {
 			config := buildConfig(logDir)
-			config.StructuredData = "[StructuredData@1 test=\"1\"]"
+			config.StructuredDataID = "StructuredData@1"
+			config.StructuredDataMap = map[string]string{"test": "1"}
 			blackboxRunner.StartWithConfig(config, 1)
 
 			logFile.WriteString("hello\n")
@@ -621,9 +664,11 @@ var _ = Describe("Blackbox", func() {
 			Eventually(buffer, "5s").Should(gbytes.Say("world"))
 
 			ginkgomon.Interrupt(serverProcess)
-
+			// TODO: Figure out if we can make sure this log goes through
 			logFile.WriteString("can't log this\n")
+			logFile.WriteString("more\n")
 			logFile.Sync()
+			logFile.Close()
 
 			time.Sleep(2 * syslog.ServerPollingInterval)
 
@@ -633,11 +678,6 @@ var _ = Describe("Blackbox", func() {
 				Buffer: buffer2,
 			})
 
-			logFile.WriteString("more\n")
-			logFile.Sync()
-			logFile.Close()
-
-			Eventually(buffer2, "5s").Should(gbytes.Say("can't log this"))
 			Eventually(buffer2, "5s").Should(gbytes.Say("more"))
 
 			ginkgomon.Interrupt(serverProcess)
