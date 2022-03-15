@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/blackbox/syslog"
+	"code.cloudfoundry.org/go-loggregator/v8/rfc5424"
 	"github.com/tedsuo/ifrit/grouper"
 )
 
@@ -22,7 +23,7 @@ type fileWatcher struct {
 	logFilename        bool
 	dynamicGroupClient grouper.DynamicClient
 	hostname           string
-	structuredData     string
+	structuredData     rfc5424.StructuredData
 	excludeFilePattern string
 
 	drain syslog.Drain
@@ -35,7 +36,7 @@ func NewFileWatcher(
 	dynamicGroupClient grouper.DynamicClient,
 	drain syslog.Drain,
 	hostname string,
-	structuredData string,
+	structuredData rfc5424.StructuredData,
 	excludeFilePattern string,
 ) *fileWatcher {
 	return &fileWatcher{

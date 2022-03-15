@@ -31,10 +31,10 @@ type drainer struct {
 	dialFunction   func() (net.Conn, error)
 	errorLogger    *log.Logger
 	hostname       string
-	structuredData string
+	structuredData rfc5424.StructuredData
 }
 
-func NewDrainer(errorLogger *log.Logger, drain Drain, hostname, structuredData string) (*drainer, error) {
+func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData) (*drainer, error) {
 	var dialFunction func() (net.Conn, error)
 	var tlsConf *tls.Config
 	if len(drain.CA) != 0 {
@@ -84,14 +84,18 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname, structuredData s
 }
 
 func (d *drainer) Drain(line string, tag string) error {
+	var structuredDatas []rfc5424.StructuredData
+	if d.structuredData.ID != "" {
+		structuredDatas = append(structuredDatas, d.structuredData)
+	}
 	m := rfc5424.Message{
-		Priority:  rfc5424.Info,
-		Timestamp: time.Now(),
-		Hostname:  d.hostname,
-		AppName:   tag,
-		ProcessID: "rs2",
-		Message:   []byte(line),
-		// StructuredData: d.structuredData,
+		Priority:       rfc5424.Info,
+		Timestamp:      time.Now(),
+		Hostname:       d.hostname,
+		AppName:        tag,
+		ProcessID:      "rs2",
+		Message:        []byte(line),
+		StructuredData: structuredDatas,
 	}
 
 	binary, err := m.MarshalBinary()

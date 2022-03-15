@@ -245,7 +245,8 @@ var _ = Describe("Blackbox", func() {
 
 		It("can have structured data", func() {
 			config := buildConfig(logDir)
-			config.StructuredData = "[StructuredData@1 test=\"1\"]"
+			config.StructuredDataID = "StructuredData@1"
+			config.StructuredDataMap = map[string]string{"test": "1"}
 			blackboxRunner.StartWithConfig(config, 1)
 
 			logFile.WriteString("hello\n")

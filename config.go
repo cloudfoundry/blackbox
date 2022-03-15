@@ -16,10 +16,11 @@ type SyslogConfig struct {
 }
 
 type Config struct {
-	Hostname       string       `yaml:"hostname"`
-	StructuredData string       `yaml:"structured_data"`
-	Syslog         SyslogConfig `yaml:"syslog"`
-	UseRFC3339     bool         `yaml:"use_rfc3339"`
+	Hostname          string            `yaml:"hostname"`
+	StructuredDataID  string            `yaml:"structured_data_id"`
+	StructuredDataMap map[string]string `yaml:"structured_data_map"`
+	Syslog            SyslogConfig      `yaml:"syslog"`
+	UseRFC3339        bool              `yaml:"use_rfc3339"`
 }
 
 func LoadConfig(path string) (*Config, error) {
