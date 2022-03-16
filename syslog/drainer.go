@@ -3,6 +3,7 @@ package syslog
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -36,27 +37,25 @@ type drainer struct {
 }
 
 func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData, maxMessageSize int) (*drainer, error) {
-	var dialFunction func() (net.Conn, error)
-	var tlsConf *tls.Config
-	if len(drain.CA) != 0 {
-		ca, err := ioutil.ReadFile(drain.CA)
-		if err != nil {
-			errorLogger.Printf("Error reading ca certificate: %s \n", err.Error())
-			return nil, err
-		}
-		certPool := x509.NewCertPool()
-		certPool.AppendCertsFromPEM(ca)
-		tlsConf, err = tlsconfig.Build(
-			tlsconfig.WithExternalServiceDefaults(),
-		).Client(
-			tlsconfig.WithAuthority(certPool),
-		)
-		if err != nil {
-			errorLogger.Printf("Error creating tls config: %s \n", err.Error())
-			return nil, err
-		}
+	tlsConf, err := generateTLSConfig(drain.CA)
+	if err != nil {
+		errorLogger.Printf(err.Error())
+		return nil, err
 	}
 
+	dialFunction := generateDialer(drain, tlsConf)
+
+	return &drainer{
+		hostname:       hostname,
+		structuredData: structuredData,
+		errorLogger:    errorLogger,
+		maxMessageSize: maxMessageSize,
+		dialFunction:   dialFunction,
+	}, nil
+}
+
+func generateDialer(drain Drain, tlsConf *tls.Config) func() (net.Conn, error) {
+	var dialFunction func() (net.Conn, error)
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: time.Second * 60 * 3,
@@ -75,14 +74,33 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structure
 			return dialer.Dial("udp", drain.Address)
 		}
 	}
+	return dialFunction
+}
 
-	return &drainer{
-		hostname:       hostname,
-		structuredData: structuredData,
-		errorLogger:    errorLogger,
-		maxMessageSize: maxMessageSize,
-		dialFunction:   dialFunction,
-	}, nil
+func generateTLSConfig(caString string) (*tls.Config, error) {
+	if len(caString) == 0 {
+		return nil, nil
+	}
+
+	ca, err := ioutil.ReadFile(caString)
+	if err != nil {
+		err = fmt.Errorf("Error reading ca certificate: %s \n", err.Error())
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	certPool.AppendCertsFromPEM(ca)
+	tlsConf, err := tlsconfig.Build(
+		tlsconfig.WithExternalServiceDefaults(),
+	).Client(
+		tlsconfig.WithAuthority(certPool),
+	)
+	if err != nil {
+		err = fmt.Errorf("Error creating tls config: %s \n", err.Error())
+		return nil, err
+	}
+
+	return tlsConf, nil
 }
 
 func (d *drainer) Drain(line string, tag string) error {
