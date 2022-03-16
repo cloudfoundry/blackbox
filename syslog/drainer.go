@@ -104,7 +104,7 @@ func (d *drainer) Drain(line string, tag string) error {
 	}
 }
 
-func (d *drainer) formatMessage(line string, tag string) ([]byte, err) {
+func (d *drainer) formatMessage(line string, tag string) ([]byte, error) {
 	var structuredDatas []rfc5424.StructuredData
 	if d.structuredData.ID != "" {
 		structuredDatas = append(structuredDatas, d.structuredData)
