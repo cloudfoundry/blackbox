@@ -86,6 +86,25 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structure
 }
 
 func (d *drainer) Drain(line string, tag string) error {
+	binary, err := d.formatMessage(line, tag)
+	if err != nil {
+		return err
+	}
+	for {
+		d.ensureConnection()
+		d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
+		_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
+		if err == nil {
+			return nil
+		}
+		d.errorLogger.Printf("Error writing: %s \n", err.Error())
+		d.conn.Close()
+		d.conn = nil
+		time.Sleep(time.Second)
+	}
+}
+
+func (d *drainer) formatMessage(line string, tag string) ([]byte, err) {
 	var structuredDatas []rfc5424.StructuredData
 	if d.structuredData.ID != "" {
 		structuredDatas = append(structuredDatas, d.structuredData)
@@ -103,30 +122,23 @@ func (d *drainer) Drain(line string, tag string) error {
 	binary, err := m.MarshalBinary()
 	if err != nil {
 		d.errorLogger.Printf("Error marshalling syslog: %s \n", err.Error())
-		return err
+		return nil, err
 	}
 	if len(binary) > d.maxMessageSize {
 		binary = binary[:d.maxMessageSize]
 	}
-	for {
-		for d.conn == nil {
-			conn, err := d.dialFunction()
-			if err != nil {
-				d.errorLogger.Printf("Error connecting: %s \n", err.Error())
-				time.Sleep(time.Second)
-			}
-			if conn != nil {
-				d.conn = conn
-			}
+	return binary, nil
+}
+
+func (d *drainer) ensureConnection() {
+	for d.conn == nil {
+		conn, err := d.dialFunction()
+		if err != nil {
+			d.errorLogger.Printf("Error connecting: %s \n", err.Error())
+			time.Sleep(time.Second)
 		}
-		d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
-		_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
-		if err == nil {
-			return nil
+		if conn != nil {
+			d.conn = conn
 		}
-		d.errorLogger.Printf("Error writing: %s \n", err.Error())
-		d.conn.Close()
-		d.conn = nil
-		time.Sleep(1 * time.Second)
 	}
 }
