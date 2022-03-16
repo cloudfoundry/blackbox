@@ -622,7 +622,7 @@ var _ = Describe("Blackbox", func() {
 			Eventually(buffer, "5s").Should(gbytes.Say("world"))
 
 			ginkgomon.Interrupt(serverProcess)
-
+			// TODO: Figure out if we can make sure this log goes through
 			logFile.WriteString("can't log this\n")
 			logFile.WriteString("more\n")
 			logFile.Sync()
