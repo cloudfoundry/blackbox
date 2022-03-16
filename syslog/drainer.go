@@ -3,7 +3,6 @@ package syslog
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -118,10 +117,8 @@ func (d *drainer) Drain(line string, tag string) error {
 		d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
 		_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
 		if err == nil {
-			fmt.Println(line + " succeeded to write")
 			return nil
 		}
-		fmt.Println(line + " failed to write")
 		d.errorLogger.Printf("Error writing: %s \n", err.Error())
 		d.conn.Close()
 		d.conn = nil
