@@ -3,6 +3,7 @@ package syslog
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -103,21 +104,27 @@ func (d *drainer) Drain(line string, tag string) error {
 		d.errorLogger.Printf("Error marshalling syslog: %s \n", err.Error())
 		return err
 	}
-	for d.conn == nil {
-		conn, err := d.dialFunction()
-		if err != nil {
-			d.errorLogger.Printf("Error connecting: %s \n", err.Error())
-			time.Sleep(time.Second)
+	for {
+		for d.conn == nil {
+			conn, err := d.dialFunction()
+			if err != nil {
+				d.errorLogger.Printf("Error connecting: %s \n", err.Error())
+				time.Sleep(time.Second)
+			}
+			if conn != nil {
+				d.conn = conn
+			}
 		}
-		if conn != nil {
-			d.conn = conn
+		d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
+		_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
+		if err == nil {
+			fmt.Println(line + " succeeded to write")
+			return nil
 		}
-	}
-	d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
-	_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
-	if err != nil {
+		fmt.Println(line + " failed to write")
 		d.errorLogger.Printf("Error writing: %s \n", err.Error())
+		d.conn.Close()
 		d.conn = nil
+		time.Sleep(1 * time.Second)
 	}
-	return nil
 }

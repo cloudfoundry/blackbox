@@ -624,7 +624,9 @@ var _ = Describe("Blackbox", func() {
 			ginkgomon.Interrupt(serverProcess)
 
 			logFile.WriteString("can't log this\n")
+			logFile.WriteString("more\n")
 			logFile.Sync()
+			logFile.Close()
 
 			time.Sleep(2 * syslog.ServerPollingInterval)
 
@@ -634,11 +636,6 @@ var _ = Describe("Blackbox", func() {
 				Buffer: buffer2,
 			})
 
-			logFile.WriteString("more\n")
-			logFile.Sync()
-			logFile.Close()
-
-			Eventually(buffer2, "5s").Should(gbytes.Say("can't log this"))
 			Eventually(buffer2, "5s").Should(gbytes.Say("more"))
 
 			ginkgomon.Interrupt(serverProcess)
