@@ -23,6 +23,7 @@ type fileWatcher struct {
 	logFilename        bool
 	dynamicGroupClient grouper.DynamicClient
 	hostname           string
+	maxMessageSize     int
 	structuredData     rfc5424.StructuredData
 	excludeFilePattern string
 
@@ -36,6 +37,7 @@ func NewFileWatcher(
 	dynamicGroupClient grouper.DynamicClient,
 	drain syslog.Drain,
 	hostname string,
+	maxMessageSize int,
 	structuredData rfc5424.StructuredData,
 	excludeFilePattern string,
 ) *fileWatcher {
@@ -47,6 +49,7 @@ func NewFileWatcher(
 		drain:              drain,
 		hostname:           hostname,
 		structuredData:     structuredData,
+		maxMessageSize:     maxMessageSize,
 		excludeFilePattern: excludeFilePattern,
 	}
 }
@@ -105,7 +108,7 @@ func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileI
 }
 
 func (f *fileWatcher) memberForFile(logfilePath string) grouper.Member {
-	drainer, err := syslog.NewDrainer(f.logger, f.drain, f.hostname, f.structuredData)
+	drainer, err := syslog.NewDrainer(f.logger, f.drain, f.hostname, f.structuredData, f.maxMessageSize)
 	if err != nil {
 		f.logger.Fatalf("could not drain to syslog: %s\n", err)
 	}

@@ -66,7 +66,7 @@ func main() {
 		}
 	}
 	go func() {
-		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, config.Syslog.LogFilename, group.Client(), config.Syslog.Destination, config.Hostname, structuredData, config.Syslog.ExcludeFilePattern)
+		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, config.Syslog.LogFilename, group.Client(), config.Syslog.Destination, config.Hostname, config.MaxMessageSize, structuredData, config.Syslog.ExcludeFilePattern)
 		fileWatcher.Watch()
 	}()
 

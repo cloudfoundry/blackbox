@@ -32,9 +32,10 @@ type drainer struct {
 	errorLogger    *log.Logger
 	hostname       string
 	structuredData rfc5424.StructuredData
+	maxMessageSize int
 }
 
-func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData) (*drainer, error) {
+func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData, maxMessageSize int) (*drainer, error) {
 	var dialFunction func() (net.Conn, error)
 	var tlsConf *tls.Config
 	if len(drain.CA) != 0 {
@@ -79,6 +80,7 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structure
 		hostname:       hostname,
 		structuredData: structuredData,
 		errorLogger:    errorLogger,
+		maxMessageSize: maxMessageSize,
 		dialFunction:   dialFunction,
 	}, nil
 }
@@ -102,6 +104,9 @@ func (d *drainer) Drain(line string, tag string) error {
 	if err != nil {
 		d.errorLogger.Printf("Error marshalling syslog: %s \n", err.Error())
 		return err
+	}
+	if len(binary) > d.maxMessageSize {
+		binary = binary[:d.maxMessageSize]
 	}
 	for {
 		for d.conn == nil {
