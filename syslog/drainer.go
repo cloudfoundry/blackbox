@@ -138,7 +138,7 @@ func (d *drainer) formatMessage(line string, tag string) ([]byte, error) {
 		Timestamp:      time.Now(),
 		Hostname:       d.hostname,
 		AppName:        tag,
-		ProcessID:      "rs2",
+		ProcessID:      "cloudfoundry-blackbox",
 		Message:        []byte(line),
 		StructuredData: structuredDatas,
 	}
