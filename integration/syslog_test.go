@@ -176,7 +176,7 @@ var _ = Describe("Blackbox", func() {
 			blackboxRunner.Stop()
 		})
 
-		It("truncates messages longer then 1019 in udp", func() {
+		It("truncates messages longer then 1024 in udp", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 

@@ -48,7 +48,7 @@ func LoadConfig(path string) (*Config, error) {
 		config.MaxMessageSize = 99990
 	}
 	if config.Syslog.Destination.Transport == "udp" {
-		config.MaxMessageSize = 1019
+		config.MaxMessageSize = 1024
 	}
 
 	return &config, nil

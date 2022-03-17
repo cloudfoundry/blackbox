@@ -34,6 +34,7 @@ type drainer struct {
 	hostname       string
 	structuredData rfc5424.StructuredData
 	maxMessageSize int
+	transport      string
 }
 
 func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData, maxMessageSize int) (*drainer, error) {
@@ -51,6 +52,7 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structure
 		errorLogger:    errorLogger,
 		maxMessageSize: maxMessageSize,
 		dialFunction:   dialFunction,
+		transport:      drain.Transport,
 	}, nil
 }
 
@@ -111,7 +113,11 @@ func (d *drainer) Drain(line string, tag string) error {
 	for {
 		d.ensureConnection()
 		d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
-		_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
+		if d.transport == "udp" {
+			_, err = d.conn.Write(binary)
+		} else {
+			_, err = d.conn.Write([]byte(strconv.Itoa(len(binary)) + " " + string(binary)))
+		}
 		if err == nil {
 			return nil
 		}
