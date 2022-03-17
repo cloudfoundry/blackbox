@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"code.cloudfoundry.org/go-loggregator/v8/rfc5424"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
@@ -53,8 +54,19 @@ func main() {
 	group := grouper.NewDynamic(nil, 0, 0)
 	running := ifrit.Invoke(sigmon.New(group))
 
+	var structuredData rfc5424.StructuredData
+	if config.StructuredDataID != "" {
+		params := []rfc5424.SDParam{}
+		for key, value := range config.StructuredDataMap {
+			params = append(params, rfc5424.SDParam{Name: key, Value: value})
+		}
+		structuredData = rfc5424.StructuredData{
+			ID:         config.StructuredDataID,
+			Parameters: params,
+		}
+	}
 	go func() {
-		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, config.Syslog.LogFilename, group.Client(), config.Syslog.Destination, config.Hostname, config.StructuredData, config.Syslog.ExcludeFilePattern)
+		fileWatcher := blackbox.NewFileWatcher(logger, config.Syslog.SourceDir, config.Syslog.LogFilename, group.Client(), config.Syslog.Destination, config.Hostname, config.MaxMessageSize, structuredData, config.Syslog.ExcludeFilePattern)
 		fileWatcher.Watch()
 	}()
 
