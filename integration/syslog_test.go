@@ -150,6 +150,20 @@ var _ = Describe("Blackbox", func() {
 			blackboxRunner.Stop()
 		})
 
+		It("creates messages with the expected priority", func() {
+			config := buildConfig(logDir)
+			blackboxRunner.StartWithConfig(config, 1)
+
+			logFile.WriteString("hello\n")
+			logFile.Sync()
+			logFile.Close()
+
+			var message *sl.Message
+			Eventually(inbox.Messages, "5s").Should(Receive(&message))
+			Expect(message.Facility).To(Equal(sl.User))
+			Expect(message.Severity).To(Equal(sl.Info))
+		})
+
 		It("truncates messages that are larger then configured limit", func() {
 			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
 
@@ -186,7 +200,7 @@ var _ = Describe("Blackbox", func() {
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
-			Expect(len(message.Content)).To(Equal(1020))
+			Expect(len(message.Content)).To(Equal(1019))
 
 			blackboxRunner.Stop()
 		})

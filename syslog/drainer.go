@@ -134,7 +134,7 @@ func (d *drainer) formatMessage(line string, tag string) ([]byte, error) {
 		structuredDatas = append(structuredDatas, d.structuredData)
 	}
 	m := rfc5424.Message{
-		Priority:       rfc5424.Info,
+		Priority:       rfc5424.User | rfc5424.Info,
 		Timestamp:      time.Now(),
 		Hostname:       d.hostname,
 		AppName:        tag,
