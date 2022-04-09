@@ -164,6 +164,19 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Severity).To(Equal(sl.Info))
 		})
 
+		It("creates messages with the expected procid", func() {
+			config := buildConfig(logDir)
+			blackboxRunner.StartWithConfig(config, 1)
+
+			logFile.WriteString("hello\n")
+			logFile.Sync()
+			logFile.Close()
+
+			var message *sl.Message
+			Eventually(inbox.Messages, "5s").Should(Receive(&message))
+			Expect(strings.Fields(message.Content)).To(ContainElement("rs2"))
+		})
+
 		It("truncates messages that are larger then configured limit", func() {
 			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
 
