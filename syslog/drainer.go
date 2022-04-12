@@ -136,6 +136,7 @@ func (d *drainer) formatMessage(line string, tag string) ([]byte, error) {
 	m := rfc5424.Message{
 		Priority:       rfc5424.User | rfc5424.Info,
 		Timestamp:      time.Now(),
+		UseUTC:         true,
 		Hostname:       d.hostname,
 		AppName:        tag,
 		ProcessID:      "rs2",
