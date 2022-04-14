@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rfc5424"
@@ -57,8 +58,13 @@ func main() {
 	var structuredData rfc5424.StructuredData
 	if config.StructuredDataID != "" {
 		params := []rfc5424.SDParam{}
-		for key, value := range config.StructuredDataMap {
-			params = append(params, rfc5424.SDParam{Name: key, Value: value})
+		keys := []string{}
+		for key, _ := range config.StructuredDataMap {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			params = append(params, rfc5424.SDParam{Name: key, Value: config.StructuredDataMap[key]})
 		}
 		structuredData = rfc5424.StructuredData{
 			ID:         config.StructuredDataID,
