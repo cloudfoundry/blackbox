@@ -1,7 +1,4 @@
 # blackbox
-* Tracker: [CF Platform Logging Improvements][tracker]
-* CI: [Syslog CI][CI]
-
 If you have any questions, or want to get attention for a PR or issue please reach out on the [#logging-and-metrics channel in the cloudfoundry slack](https://cloudfoundry.slack.com/archives/CUW93AF3M)
 
 ## About
