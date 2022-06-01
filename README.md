@@ -1,7 +1,8 @@
 # blackbox
-* Slack: #syslog on <https://slack.cloudfoundry.org>
 * Tracker: [CF Platform Logging Improvements][tracker]
 * CI: [Syslog CI][CI]
+
+If you have any questions, or want to get attention for a PR or issue please reach out on the [#logging-and-metrics channel in the cloudfoundry slack](https://cloudfoundry.slack.com/archives/CUW93AF3M)
 
 ## About
 Blackbox will tail all files in sub-directories of a specified `source_dir`, and forward any new lines to a syslog server.
@@ -51,7 +52,5 @@ Currently the priority and facility are hardcoded to `INFO` and `user`.
 go get -u code.cloudfoundry.org/blackbox/cmd/blackbox
 ```
 
-[CI]: https://syslog.ci.cf-app.com
-[tracker]: https://www.pivotaltracker.com/n/projects/2126318
 [windows-syslog]: https://github.com/cloudfoundry/windows-syslog-release
 [syslog]: https://github.com/cloudfoundry/syslog-release
