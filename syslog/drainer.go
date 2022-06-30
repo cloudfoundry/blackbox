@@ -12,7 +12,7 @@ import (
 
 	"code.cloudfoundry.org/tlsconfig"
 
-	"code.cloudfoundry.org/go-loggregator/v8/rfc5424"
+	"code.cloudfoundry.org/go-loggregator/v9/rfc5424"
 )
 
 type Drain struct {
