@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/blackbox/syslog"
-	"code.cloudfoundry.org/go-loggregator/v8/rfc5424"
+	"code.cloudfoundry.org/go-loggregator/v9/rfc5424"
 	"github.com/tedsuo/ifrit/grouper"
 )
 

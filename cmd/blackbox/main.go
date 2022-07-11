@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator/v8/rfc5424"
+	"code.cloudfoundry.org/go-loggregator/v9/rfc5424"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
