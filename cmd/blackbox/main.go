@@ -59,7 +59,7 @@ func main() {
 	if config.StructuredDataID != "" {
 		params := []rfc5424.SDParam{}
 		keys := []string{}
-		for key, _ := range config.StructuredDataMap {
+		for key := range config.StructuredDataMap {
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)

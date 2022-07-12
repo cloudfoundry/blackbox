@@ -3,6 +3,7 @@ package blackbox
 import (
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/nxadm/tail"
@@ -48,7 +49,11 @@ func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error
 				return nil
 			}
 
-			tailer.Drainer.Drain(line.Text, tailer.Tag)
+			lineTextNoCr := strings.TrimRight(line.Text, "\r")
+			err = tailer.Drainer.Drain(lineTextNoCr, tailer.Tag)
+			if err != nil {
+				log.Println(err.Error())
+			}
 		case <-signals:
 			return t.Stop()
 		}

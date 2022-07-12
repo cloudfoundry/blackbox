@@ -112,7 +112,10 @@ func (d *drainer) Drain(line string, tag string) error {
 	}
 	for {
 		d.ensureConnection()
-		d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
+		err = d.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
+		if err != nil {
+			return err
+		}
 		if d.transport == "udp" {
 			_, err = d.conn.Write(binary)
 		} else {
@@ -161,8 +164,7 @@ func (d *drainer) ensureConnection() {
 		if err != nil {
 			d.errorLogger.Printf("Error connecting: %s \n", err.Error())
 			time.Sleep(time.Second)
-		}
-		if conn != nil {
+		} else if conn != nil {
 			d.conn = conn
 		}
 	}

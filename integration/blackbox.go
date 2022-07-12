@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"runtime"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -107,12 +106,12 @@ func (runner *BlackboxRunner) StartWithConfig(config blackbox.Config, tailerCoun
 	runner.blackboxProcess = ginkgomon.Invoke(blackboxRunner)
 }
 
+func (runner *BlackboxRunner) ExitChannel() <-chan error {
+	return runner.blackboxProcess.Wait()
+}
+
 func (runner *BlackboxRunner) Stop() {
-	if runtime.GOOS == "windows" {
-		ginkgomon.Kill(runner.blackboxProcess)
-	} else {
-		ginkgomon.Interrupt(runner.blackboxProcess)
-	}
+	ginkgomon.Kill(runner.blackboxProcess)
 }
 
 func CreateConfigFile(config blackbox.Config) string {
@@ -123,7 +122,8 @@ func CreateConfigFile(config blackbox.Config) string {
 	yamlToWrite, err := yaml.Marshal(config)
 	Expect(err).NotTo(HaveOccurred())
 
-	configFile.Write(yamlToWrite)
+	_, err = configFile.Write(yamlToWrite)
+	Expect(err).NotTo(HaveOccurred())
 
 	return configFile.Name()
 }
