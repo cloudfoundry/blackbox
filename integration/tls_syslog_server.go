@@ -40,14 +40,14 @@ func (s *TLSSyslogServer) Run() error {
 	if s.CertPrefixOverride != "" {
 		certPrefix = s.CertPrefixOverride
 	}
-	// Listen for incoming connections.
 	cer, err := tls.LoadX509KeyPair(certPrefix+".crt", certPrefix+".key")
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-
 	config := &tls.Config{RootCAs: pool, Certificates: []tls.Certificate{cer}}
+
+	// Listen for incoming connections.
 	s.l, err = tls.Listen("tcp", s.Addr, config)
 	if err != nil {
 		return err

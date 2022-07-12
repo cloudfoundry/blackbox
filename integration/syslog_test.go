@@ -170,7 +170,7 @@ var _ = Describe("Blackbox", func() {
 		})
 
 		It("truncates messages that are larger then configured limit", func() {
-			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelProcess())
 
 			buffer := gbytes.NewBuffer()
 			serverProcess := ginkgomon.Invoke(&TcpSyslogServer{
@@ -282,7 +282,7 @@ var _ = Describe("Blackbox", func() {
 			config.Hostname = "fake-hostname"
 			blackboxRunner.StartWithConfig(config, 1)
 
-			Write(logFile, "hello\n", true, true)
+			Write(logFile, "hello\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -299,7 +299,7 @@ var _ = Describe("Blackbox", func() {
 			config.StructuredDataMap = map[string]string{"test": "1"}
 			blackboxRunner.StartWithConfig(config, 1)
 
-			Write(logFile, "hello\n", true, true)
+			Write(logFile, "hello\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -316,7 +316,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			Write(logFile, "hello\n", true, true)
+			Write(logFile, "hello\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "2s").Should(Receive(&message))
@@ -608,7 +608,7 @@ var _ = Describe("Blackbox", func() {
 		})
 
 		It("tails files when server takes a long time to start", func() {
-			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+			address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelProcess())
 
 			config := blackbox.Config{
 				Hostname: "",
@@ -676,7 +676,7 @@ var _ = Describe("Blackbox", func() {
 		var blackboxRunner *BlackboxRunner
 
 		BeforeEach(func() {
-			address = fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+			address = fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelProcess())
 			buffer = gbytes.NewBuffer()
 			tlsserver = TLSSyslogServer{
 				Addr:   address,
@@ -719,7 +719,7 @@ var _ = Describe("Blackbox", func() {
 		var blackboxRunner *BlackboxRunner
 
 		BeforeEach(func() {
-			address = fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+			address = fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelProcess())
 			buffer = gbytes.NewBuffer()
 			tlsserver = TLSSyslogServer{
 				Addr:               address,
