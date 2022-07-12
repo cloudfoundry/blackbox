@@ -17,9 +17,10 @@ import (
 )
 
 type TLSSyslogServer struct {
-	Addr   string
-	Buffer *gbytes.Buffer
-	l      net.Listener
+	Addr               string
+	CertPrefixOverride string
+	Buffer             *gbytes.Buffer
+	l                  net.Listener
 }
 
 func (s *TLSSyslogServer) Run() error {
@@ -35,8 +36,12 @@ func (s *TLSSyslogServer) Run() error {
 		return errors.New("failed to apped CA")
 	}
 
+	certPrefix := "fixtures/server"
+	if s.CertPrefixOverride != "" {
+		certPrefix = s.CertPrefixOverride
+	}
 	// Listen for incoming connections.
-	cer, err := tls.LoadX509KeyPair("./fixtures/server.crt", "./fixtures/server.key")
+	cer, err := tls.LoadX509KeyPair(certPrefix+".crt", certPrefix+".key")
 	if err != nil {
 		log.Println(err)
 		return err

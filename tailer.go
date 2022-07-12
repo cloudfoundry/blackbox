@@ -50,7 +50,10 @@ func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error
 			}
 
 			lineTextNoCr := strings.TrimRight(line.Text, "\r")
-			tailer.Drainer.Drain(lineTextNoCr, tailer.Tag)
+			err = tailer.Drainer.Drain(lineTextNoCr, tailer.Tag)
+			if err != nil {
+				log.Println(err.Error())
+			}
 		case <-signals:
 			return t.Stop()
 		}

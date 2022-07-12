@@ -112,9 +112,7 @@ var _ = Describe("Blackbox", func() {
 				config := buildConfig(logDir)
 				blackboxRunner.StartWithConfig(config, 1)
 
-				logFile.WriteString("hello\n")
-				logFile.Sync()
-				logFile.Close()
+				Write(logFile, "hello\n", true, true)
 
 				var message *sl.Message
 				Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -131,10 +129,8 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.WriteString("world\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", false, false)
+			Write(logFile, "world\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -154,9 +150,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -168,9 +162,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -193,9 +185,7 @@ var _ = Describe("Blackbox", func() {
 			config.Syslog.Destination.Address = address
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString(strings.Repeat("a", 10000) + "\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, strings.Repeat("a", 10000)+"\n", true, true)
 
 			Eventually(buffer, "5s").Should(gbytes.Say("2000"))
 			Eventually(len(buffer.Contents()), "5s").Should(Equal(2005))
@@ -207,9 +197,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString(strings.Repeat("a", 10000) + "\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, strings.Repeat("a", 10000)+"\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -224,9 +212,7 @@ var _ = Describe("Blackbox", func() {
 				config.Syslog.LogFilename = true
 				blackboxRunner.StartWithConfig(config, 1)
 
-				logFile.WriteString("hello\n")
-				logFile.Sync()
-				logFile.Close()
+				Write(logFile, "hello\n", true, true)
 
 				var message *sl.Message
 				Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -255,9 +241,7 @@ var _ = Describe("Blackbox", func() {
 
 				var message *sl.Message
 
-				logfile.WriteString("hello \n")
-				logfile.Sync()
-				logfile.Close()
+				Write(logfile, "hello \n", true, true)
 
 				Eventually(inbox.Messages, "5s").Should(Receive(&message))
 				Expect(message.Content).ToNot(ContainSubstring(name50Chars))
@@ -282,9 +266,7 @@ var _ = Describe("Blackbox", func() {
 				config := buildConfig(logDir)
 				blackboxRunner.StartWithConfig(config, 1)
 
-				logfile.WriteString("hello \n")
-				logfile.Sync()
-				logfile.Close()
+				Write(logfile, "hello \n", true, true)
 
 				var message *sl.Message
 				Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -300,8 +282,7 @@ var _ = Describe("Blackbox", func() {
 			config.Hostname = "fake-hostname"
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -318,8 +299,7 @@ var _ = Describe("Blackbox", func() {
 			config.StructuredDataMap = map[string]string{"test": "1"}
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -331,14 +311,12 @@ var _ = Describe("Blackbox", func() {
 		})
 
 		It("does not log existing messages", func() {
-			logFile.WriteString("already present\n")
-			logFile.Sync()
+			Write(logFile, "already present\n", true, false)
 
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "2s").Should(Receive(&message))
@@ -360,8 +338,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 2)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -369,8 +346,7 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
-			anotherLogFile.WriteString("hello from the other side\n")
-			anotherLogFile.Sync()
+			Write(anotherLogFile, "hello from the other side\n", true, false)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
@@ -395,11 +371,9 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 2)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, false)
 
-			notALogFile.WriteString("john cena\n")
-			notALogFile.Sync()
+			Write(notALogFile, "john cena\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "30s").Should(Receive(&message))
@@ -409,11 +383,9 @@ var _ = Describe("Blackbox", func() {
 
 			Consistently(inbox.Messages).ShouldNot(Receive())
 
-			anotherLogFile.WriteString("hello from the other side\n")
-			anotherLogFile.Sync()
+			Write(anotherLogFile, "hello from the other side\n", true, false)
 
-			notALogFile.WriteString("my time is now\n")
-			notALogFile.Sync()
+			Write(notALogFile, "my time is now\n", true, false)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
@@ -440,11 +412,9 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 2)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, false)
 
-			notALogFile.WriteString("john cena\n")
-			notALogFile.Sync()
+			Write(notALogFile, "john cena\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "30s").Should(Receive(&message))
@@ -454,11 +424,9 @@ var _ = Describe("Blackbox", func() {
 
 			Consistently(inbox.Messages).ShouldNot(Receive())
 
-			anotherLogFile.WriteString("hello from the other side\n")
-			anotherLogFile.Sync()
+			Write(anotherLogFile, "hello from the other side\n", true, false)
 
-			notALogFile.WriteString("my time is now\n")
-			notALogFile.Sync()
+			Write(notALogFile, "my time is now\n", true, false)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
@@ -486,8 +454,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 2)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -495,8 +462,7 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
-			anotherLogFile.WriteString("hello from the other side\n")
-			anotherLogFile.Sync()
+			Write(anotherLogFile, "hello from the other side\n", true, false)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello from the other side"))
@@ -521,8 +487,7 @@ var _ = Describe("Blackbox", func() {
 			// wait for tailer to pick up file, twice the interval
 			time.Sleep(10 * time.Second)
 
-			anotherLogFile.WriteString("hello from the other side\n")
-			anotherLogFile.Sync()
+			Write(anotherLogFile, "hello from the other side\n", true, false)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -531,8 +496,7 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
 			By("keeping track of old files")
-			logFile.WriteString("hello\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", true, false)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("hello"))
@@ -546,9 +510,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -573,8 +535,7 @@ var _ = Describe("Blackbox", func() {
 			// wait for tailer to pick up file, twice the interval
 			time.Sleep(10 * time.Second)
 
-			anotherLogFile.WriteString("bye\n")
-			anotherLogFile.Sync()
+			Write(anotherLogFile, "bye\n", true, false)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("bye"))
@@ -598,9 +559,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -608,9 +567,7 @@ var _ = Describe("Blackbox", func() {
 			Expect(message.Content).To(ContainSubstring(tagName))
 			Expect(message.Content).To(ContainSubstring(Hostname()))
 
-			childLog.WriteString("child data\n")
-			childLog.Sync()
-			childLog.Close()
+			Write(childLog, "child data\n", true, true)
 
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
 			Expect(message.Content).To(ContainSubstring("child data"))
@@ -631,9 +588,7 @@ var _ = Describe("Blackbox", func() {
 			config := buildConfig(logDir)
 			blackboxRunner.StartWithConfig(config, 1)
 
-			logFile.WriteString("hello\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", true, true)
 
 			var message *sl.Message
 			Eventually(inbox.Messages, "5s").Should(Receive(&message))
@@ -683,19 +638,16 @@ var _ = Describe("Blackbox", func() {
 
 			Eventually(session.Err, "10s").Should(gbytes.Say("Start tail..."))
 
-			logFile.WriteString("hello\n")
-			logFile.WriteString("world\n")
-			logFile.Sync()
+			Write(logFile, "hello\n", false, false)
+			Write(logFile, "world\n", true, false)
 
 			Eventually(buffer, "5s").Should(gbytes.Say("hello"))
 			Eventually(buffer, "5s").Should(gbytes.Say("world"))
 
 			ginkgomon.Interrupt(serverProcess)
 			// TODO: Figure out if we can make sure this log goes through
-			logFile.WriteString("can't log this\n")
-			logFile.WriteString("more\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "can't log this\n", false, false)
+			Write(logFile, "more\n", true, true)
 
 			time.Sleep(2 * syslog.ServerPollingInterval)
 
@@ -730,7 +682,8 @@ var _ = Describe("Blackbox", func() {
 				Addr:   address,
 				Buffer: buffer,
 			}
-			tlsserver.Run()
+			err := tlsserver.Run()
+			Expect(err).ToNot(HaveOccurred())
 			blackboxRunner = NewBlackboxRunner(blackboxPath)
 		})
 
@@ -751,13 +704,68 @@ var _ = Describe("Blackbox", func() {
 				},
 			}
 			blackboxRunner.StartWithConfig(blackboxConfig, 1)
-			logFile.WriteString("hello\n")
-			logFile.Sync()
-			logFile.Close()
+			Write(logFile, "hello\n", true, true)
 
 			Eventually(buffer, "5s").Should(gbytes.Say("hello"))
 
 			blackboxRunner.Stop()
 		})
 	})
+
+	Context("When the server uses bad tls", func() {
+		var address string
+		var buffer *gbytes.Buffer
+		var tlsserver TLSSyslogServer
+		var blackboxRunner *BlackboxRunner
+
+		BeforeEach(func() {
+			address = fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelNode())
+			buffer = gbytes.NewBuffer()
+			tlsserver = TLSSyslogServer{
+				Addr:               address,
+				Buffer:             buffer,
+				CertPrefixOverride: "./fixtures/server-bad",
+			}
+			err := tlsserver.Run()
+			Expect(err).ToNot(HaveOccurred())
+			blackboxRunner = NewBlackboxRunner(blackboxPath)
+		})
+
+		AfterEach(func() {
+			tlsserver.Stop()
+		})
+
+		It("doesn't cause blackbox to fail", func() {
+			blackboxConfig := blackbox.Config{
+				Hostname: "",
+				Syslog: blackbox.SyslogConfig{
+					Destination: syslog.Drain{
+						Transport: "tls",
+						Address:   address,
+						CA:        "./fixtures/ca.crt",
+					},
+					SourceDir: logDir,
+				},
+			}
+			blackboxRunner.StartWithConfig(blackboxConfig, 1)
+			Write(logFile, "hello\n", true, true)
+
+			Consistently(blackboxRunner.ExitChannel(), 10).ShouldNot(Receive())
+
+			blackboxRunner.Stop()
+		})
+	})
 })
+
+func Write(file *os.File, line string, sync bool, close bool) {
+	_, err := file.WriteString(line)
+	Expect(err).ToNot(HaveOccurred())
+	if sync {
+		err = file.Sync()
+		Expect(err).ToNot(HaveOccurred())
+	}
+	if close {
+		err = file.Close()
+		Expect(err).ToNot(HaveOccurred())
+	}
+}
