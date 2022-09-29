@@ -1,7 +1,7 @@
 package blackbox
 
 import (
-	"io/ioutil"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -56,7 +56,7 @@ func NewFileWatcher(
 
 func (f *fileWatcher) Watch() {
 	for {
-		logDirs, err := ioutil.ReadDir(f.sourceDir)
+		logDirs, err := os.ReadDir(f.sourceDir)
 		if err != nil {
 			f.logger.Fatalf("could not list directories in source dir: %s\n", err)
 		}
@@ -82,7 +82,7 @@ func (f *fileWatcher) Watch() {
 	}
 }
 
-func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileInfo) {
+func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file fs.FileInfo) {
 	if !file.IsDir() {
 		if strings.HasSuffix(file.Name(), ".log") {
 			if matched, _ := filepath.Match(f.excludeFilePattern, file.Name()); matched {
@@ -95,7 +95,7 @@ func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileI
 		return
 	}
 
-	dirContents, err := ioutil.ReadDir(filePath)
+	dirContents, err := os.ReadDir(filePath)
 	if err != nil {
 		f.logger.Printf("skipping log dir '%s' (could not list files): %s\n", tag, err)
 		return
@@ -103,7 +103,10 @@ func (f *fileWatcher) findLogsToWatch(tag string, filePath string, file os.FileI
 
 	for _, content := range dirContents {
 		currentFilePath := filepath.Join(filePath, content.Name())
-		f.findLogsToWatch(tag, currentFilePath, content)
+		info, err := content.Info()
+		if err == nil {
+			f.findLogsToWatch(tag, currentFilePath, info)
+		}
 	}
 }
 

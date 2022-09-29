@@ -4,9 +4,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"time"
 
@@ -84,7 +84,7 @@ func generateTLSConfig(caString string) (*tls.Config, error) {
 		return nil, nil
 	}
 
-	ca, err := ioutil.ReadFile(caString)
+	ca, err := os.ReadFile(caString)
 	if err != nil {
 		err = fmt.Errorf("Error reading ca certificate: %s \n", err.Error())
 		return nil, err

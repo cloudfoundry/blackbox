@@ -1,7 +1,6 @@
 package blackbox
 
 import (
-	"io/ioutil"
 	"os"
 
 	"code.cloudfoundry.org/blackbox/syslog"
@@ -25,7 +24,7 @@ type Config struct {
 }
 
 func LoadConfig(path string) (*Config, error) {
-	configFile, err := ioutil.ReadFile(path)
+	configFile, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

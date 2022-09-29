@@ -2,7 +2,6 @@ package integration
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -115,7 +114,7 @@ func (runner *BlackboxRunner) Stop() {
 }
 
 func CreateConfigFile(config blackbox.Config) string {
-	configFile, err := ioutil.TempFile("", "blackbox_config")
+	configFile, err := os.CreateTemp("", "blackbox_config")
 	Expect(err).NotTo(HaveOccurred())
 	defer configFile.Close()
 
