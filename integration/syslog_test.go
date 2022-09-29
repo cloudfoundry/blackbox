@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,7 +36,7 @@ var _ = Describe("Blackbox", func() {
 
 	BeforeEach(func() {
 		var err error
-		logDir, err = ioutil.TempDir("", "syslog-test")
+		logDir, err = os.MkdirTemp("", "syslog-test")
 		Expect(err).NotTo(HaveOccurred())
 
 		err = os.Mkdir(filepath.Join(logDir, tagName), os.ModePerm)
@@ -578,7 +577,7 @@ var _ = Describe("Blackbox", func() {
 		})
 
 		It("ignores files in source directory", func() {
-			err := ioutil.WriteFile(
+			err := os.WriteFile(
 				filepath.Join(logDir, "not-a-tag-dir.log"),
 				[]byte("some-data"),
 				os.ModePerm,

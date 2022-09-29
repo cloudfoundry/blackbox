@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"strings"
 
 	. "github.com/onsi/ginkgo"
@@ -28,7 +28,7 @@ func (s *TLSSyslogServer) Run() error {
 	if pool == nil {
 		pool = x509.NewCertPool()
 	}
-	ca_cert, err := ioutil.ReadFile("./fixtures/ca.crt")
+	ca_cert, err := os.ReadFile("./fixtures/ca.crt")
 	if err != nil {
 		return err
 	}
