@@ -215,7 +215,7 @@ var _ = Describe("Blackbox", func() {
 
 				var message *sl.Message
 				Eventually(inbox.Messages, "5s").Should(Receive(&message))
-				Expect(message.Content).To(ContainSubstring(tagName + "/" + logfileName))
+				Expect(message.Content).To(MatchRegexp(tagName + `[/\\]` + logfileName))
 
 				blackboxRunner.Stop()
 			})
@@ -249,7 +249,7 @@ var _ = Describe("Blackbox", func() {
 				blackboxRunner.Stop()
 			})
 			It("removes all characters that are not between ASCII 33 - 126 from the tag name", func() {
-				specialCharsName := "ab c§d "
+				specialCharsName := "ab c§d"
 				expectedNoSpecialCharsName := "abcd"
 
 				err := os.Mkdir(filepath.Join(logDir, specialCharsName), os.ModePerm)
