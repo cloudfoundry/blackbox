@@ -1,6 +1,7 @@
 package blackbox
 
 import (
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -29,7 +30,7 @@ func (tailer *Tailer) Run(signals <-chan os.Signal, ready chan<- struct{}) error
 		Poll:   true,
 		Location: &tail.SeekInfo{
 			Offset: 0,
-			Whence: os.SEEK_END,
+			Whence: io.SeekEnd,
 		},
 		Logger: tailer.Logger,
 	})
