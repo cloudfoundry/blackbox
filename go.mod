@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/blackbox
 
-go 1.19
+go 1.20
 
 require (
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.3
