@@ -24,7 +24,7 @@ type TLSSyslogServer struct {
 }
 
 func (s *TLSSyslogServer) Run() error {
-	pool, err := x509.SystemCertPool()
+	pool, _ := x509.SystemCertPool()
 	if pool == nil {
 		pool = x509.NewCertPool()
 	}
