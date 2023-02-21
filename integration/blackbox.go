@@ -33,7 +33,7 @@ func NewSyslogServer(inbox *Inbox) *SyslogServer {
 }
 
 func (s *SyslogServer) Start() {
-	port := fmt.Sprintf("%d", 9090+GinkgoParallelNode())
+	port := fmt.Sprintf("%d", 9090+GinkgoParallelProcess())
 	l, err := net.Listen("tcp", ":"+port)
 	Expect(err).NotTo(HaveOccurred())
 	l.Close()
