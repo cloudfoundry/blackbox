@@ -1,5 +1,5 @@
-code.cloudfoundry.org/go-loggregator/v9 v9.0.3 h1:+rxFxl+qFN42oVGzh5uhnQRkyMt3H6dPsM9YCrfmpQw=
-code.cloudfoundry.org/go-loggregator/v9 v9.0.3/go.mod h1:M3KaLTzcbSuXf9xRjFk4nexDK2h8/NDsQ+nzh+45cfk=
+code.cloudfoundry.org/go-loggregator/v9 v9.0.4 h1:Pg0kMK2sLeDxbynUiskSfHrWzizxrI4KNpPIuGToyj0=
+code.cloudfoundry.org/go-loggregator/v9 v9.0.4/go.mod h1:caSKhG0LCIDEdvDiyzXTg9SK4e/DW6yJPCpSMcIaqx8=
 code.cloudfoundry.org/tlsconfig v0.0.0-20211123175040-23cc9f05b6b3 h1:fv6SwdaX2uVcQKR8mXZy+6oYdthbKzkgmBzvoxSq/jY=
 code.cloudfoundry.org/tlsconfig v0.0.0-20211123175040-23cc9f05b6b3/go.mod h1:CKI5CV+3MlfcohVSuU3FxXubFyC52lYJGMLnZ2ltvks=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
