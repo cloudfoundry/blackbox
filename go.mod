@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.4
-	code.cloudfoundry.org/tlsconfig v0.0.0-20211123175040-23cc9f05b6b3
+	code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b
 	github.com/nxadm/tail v1.4.8
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.6
