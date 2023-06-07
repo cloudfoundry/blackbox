@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.5
 	code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b
 	github.com/nxadm/tail v1.4.8
-	github.com/onsi/ginkgo/v2 v2.9.7
+	github.com/onsi/ginkgo/v2 v2.10.0
 	github.com/onsi/gomega v1.27.8
 	github.com/tedsuo/ifrit v0.0.0-20230330192023-5cba443a66c4
 	github.com/ziutek/syslog v0.0.0-20180426113420-8a9fdf1a8529
@@ -24,6 +24,6 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/tools v0.9.1 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
