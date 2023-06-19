@@ -3,7 +3,7 @@ module code.cloudfoundry.org/blackbox
 go 1.20
 
 require (
-	code.cloudfoundry.org/go-loggregator/v9 v9.0.5
+	code.cloudfoundry.org/go-loggregator/v9 v9.0.6
 	code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b
 	github.com/nxadm/tail v1.4.8
 	github.com/onsi/ginkgo/v2 v2.11.0
