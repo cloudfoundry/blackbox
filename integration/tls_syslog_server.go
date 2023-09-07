@@ -45,7 +45,7 @@ func (s *TLSSyslogServer) Run() error {
 		log.Println(err)
 		return err
 	}
-	config := &tls.Config{RootCAs: pool, Certificates: []tls.Certificate{cer}}
+	config := &tls.Config{RootCAs: pool, Certificates: []tls.Certificate{cer}} //nolint:gosec
 
 	// Listen for incoming connections.
 	s.l, err = tls.Listen("tcp", s.Addr, config)

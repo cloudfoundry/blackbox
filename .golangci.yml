@@ -1,0 +1,19 @@
+run:
+  # Timeout for analysis, e.g. 30s, 5m.
+  # Default: 1m
+  timeout: 5m
+
+linters:
+  enable:
+    # Checks for non-ASCII identifiers
+    - asciicheck
+    # Computes and checks the cyclomatic complexity of functions.
+    - gocyclo
+    # Inspects source code for security problems.
+    - gosec
+
+issues:
+  # Disable max issues per linter.
+  max-issues-per-linter: 0
+  # Disable max same issues.
+  max-same-issues: 0

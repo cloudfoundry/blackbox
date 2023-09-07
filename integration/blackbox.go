@@ -89,7 +89,7 @@ func NewBlackboxRunner(blackboxPath string) *BlackboxRunner {
 func (runner *BlackboxRunner) StartWithConfig(config blackbox.Config, tailerCount int) {
 	configPath := CreateConfigFile(config)
 
-	blackboxCmd := exec.Command(runner.blackboxPath, "-config", configPath)
+	blackboxCmd := exec.Command(runner.blackboxPath, "-config", configPath) //nolint: gosec
 	blackboxRunner := ginkgomon.New(
 		ginkgomon.Config{
 			Name:          "blackbox",
