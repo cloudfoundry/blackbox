@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.8
 	code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b
 	github.com/nxadm/tail v1.4.8
-	github.com/onsi/ginkgo/v2 v2.12.1
+	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.28.0
 	github.com/tedsuo/ifrit v0.0.0-20230330192023-5cba443a66c4
 	github.com/ziutek/syslog v0.0.0-20180426113420-8a9fdf1a8529
