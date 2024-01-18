@@ -17,14 +17,13 @@ func TestIntegration(t *testing.T) {
 	RunSpecs(t, "Integration Suite")
 }
 
-var _ = BeforeSuite(func() {
-	var err error
-	blackboxPath, err = gexec.Build("code.cloudfoundry.org/blackbox/cmd/blackbox")
+var _ = SynchronizedBeforeSuite(func() []byte {
+	path, err := gexec.Build("code.cloudfoundry.org/blackbox/cmd/blackbox")
 	Expect(err).NotTo(HaveOccurred())
-})
-
-var _ = AfterSuite(func() {
-	gexec.CleanupBuildArtifacts()
+	DeferCleanup(gexec.CleanupBuildArtifacts)
+	return []byte(path)
+}, func(data []byte) {
+	blackboxPath = string(data)
 })
 
 func Hostname() string {
