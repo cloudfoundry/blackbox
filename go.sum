@@ -592,8 +592,8 @@ cloud.google.com/go/workflows v1.7.0/go.mod h1:JhSrZuVZWuiDfKEFxU0/F1PQjmpnpcoIS
 cloud.google.com/go/workflows v1.8.0/go.mod h1:ysGhmEajwZxGn1OhGOGKsTXc5PyxOc0vfKf5Af+to4M=
 cloud.google.com/go/workflows v1.9.0/go.mod h1:ZGkj1aFIOd9c8Gerkjjq7OW7I5+l6cSvT3ujaO/WwSA=
 cloud.google.com/go/workflows v1.10.0/go.mod h1:fZ8LmRmZQWacon9UCX1r/g/DfAXx5VcPALq2CxzdePw=
-code.cloudfoundry.org/go-loggregator/v9 v9.2.0 h1:YNVD654RhMWzG195DZm0gNnrWAJJhEw/gd/cc5Bv28s=
-code.cloudfoundry.org/go-loggregator/v9 v9.2.0/go.mod h1:AP7PmrWSpyC9ltOQHcwF16BVkAVXS96i8+8gwI4lXRY=
+code.cloudfoundry.org/go-loggregator/v9 v9.2.1 h1:S6Lgg5UJbhh2bt2TGQxs6R00CF8PrUA3GFPYDxy56Fk=
+code.cloudfoundry.org/go-loggregator/v9 v9.2.1/go.mod h1:FTFFruqGeOhVCDFvyLgl8EV8YW63NNwRzLhxJcporu8=
 code.cloudfoundry.org/tlsconfig v0.0.0-20240410162701-78a97c114f7f h1:Xftr0ImG0QFvqhzO0OW7fdyTFjVVNWTmDi0DHqykxKY=
 code.cloudfoundry.org/tlsconfig v0.0.0-20240410162701-78a97c114f7f/go.mod h1:gWadw3Y5wh7DrpGzH8kxASbXeAQngtnHAcfJXF9YQsE=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
