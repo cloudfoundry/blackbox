@@ -95,7 +95,7 @@ func (runner *BlackboxRunner) StartWithConfig(config blackbox.Config, tailerCoun
 			Name:          "blackbox",
 			Command:       blackboxCmd,
 			AnsiColorCode: "90m",
-			StartCheck:    "Start tail...",
+			StartCheck:    "Starting to tail file:",
 			Cleanup: func() {
 				os.Remove(configPath)
 			},

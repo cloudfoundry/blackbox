@@ -635,7 +635,7 @@ var _ = Describe("Blackbox", func() {
 				Buffer: buffer,
 			})
 
-			Eventually(session.Err, "10s").Should(gbytes.Say("Start tail..."))
+			Eventually(session.Err, "10s").Should(gbytes.Say("Starting to tail file:"))
 
 			Write(logFile, "hello\n", false, false)
 			Write(logFile, "world\n", true, false)
@@ -656,7 +656,7 @@ var _ = Describe("Blackbox", func() {
 				Buffer: buffer2,
 			})
 
-			Eventually(buffer2, "5s").Should(gbytes.Say("more"))
+			Eventually(buffer2, "10s").Should(gbytes.Say("more"))
 
 			ginkgomon.Interrupt(serverProcess)
 
@@ -668,6 +668,7 @@ var _ = Describe("Blackbox", func() {
 			}
 		})
 	})
+
 	Context("When the server uses tls", func() {
 		var address string
 		var buffer *gbytes.Buffer
@@ -752,6 +753,98 @@ var _ = Describe("Blackbox", func() {
 			Consistently(blackboxRunner.ExitChannel(), 10).ShouldNot(Receive())
 
 			blackboxRunner.Stop()
+		})
+	})
+
+	Context("when max retries is configured", func() {
+		Context("when the syslog server never comes up", func() {
+			It("causes blackbox to fail", func() {
+				address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelProcess())
+
+				config := blackbox.Config{
+					Hostname: "",
+					Syslog: blackbox.SyslogConfig{
+						Destination: syslog.Drain{
+							Transport:  "tcp",
+							Address:    address,
+							MaxRetries: 3,
+						},
+						SourceDir: logDir,
+					},
+				}
+				configPath := CreateConfigFile(config)
+				defer os.Remove(configPath)
+
+				blackboxCmd := exec.Command(blackboxPath, "-config", configPath)
+				session, err := gexec.Start(blackboxCmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+				defer func() {
+					if runtime.GOOS == "windows" {
+						session.Kill()
+					} else {
+						session.Signal(os.Interrupt)
+						session.Wait()
+					}
+				}()
+				Eventually(session.Err, "10s").Should(gbytes.Say("Starting to tail file:"))
+
+				Write(logFile, "try to log this\n", false, false)
+				Write(logFile, "try to log more and notice can't write to socket\n", true, true)
+
+				Expect(session.Wait("20s")).To(gexec.Exit(1))
+			})
+		})
+
+		Context("when the syslog server goes down for a long enough time", func() {
+			It("causes blackbox to fail", func() {
+				address := fmt.Sprintf("127.0.0.1:%d", 9090+GinkgoParallelProcess())
+
+				buffer := gbytes.NewBuffer()
+				serverProcess := ginkgomon.Invoke(&TcpSyslogServer{
+					Addr:   address,
+					Buffer: buffer,
+				})
+
+				config := blackbox.Config{
+					Hostname: "",
+					Syslog: blackbox.SyslogConfig{
+						Destination: syslog.Drain{
+							Transport:  "tcp",
+							Address:    address,
+							MaxRetries: 1,
+						},
+						SourceDir: logDir,
+					},
+				}
+				configPath := CreateConfigFile(config)
+				defer os.Remove(configPath)
+
+				blackboxCmd := exec.Command(blackboxPath, "-config", configPath)
+				session, err := gexec.Start(blackboxCmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+				defer func() {
+					if runtime.GOOS == "windows" {
+						session.Kill()
+					} else {
+						session.Signal(os.Interrupt)
+						session.Wait()
+					}
+				}()
+				Eventually(session.Err, "10s").Should(gbytes.Say("Starting to tail file:"))
+
+				Write(logFile, "hello\n", false, false)
+				Write(logFile, "world\n", true, false)
+
+				Eventually(buffer, "5s").Should(gbytes.Say("hello"))
+				Eventually(buffer, "5s").Should(gbytes.Say("world"))
+
+				ginkgomon.Interrupt(serverProcess)
+
+				Write(logFile, "try to log this\n", false, false)
+				Write(logFile, "try to log more and notice can't write to socket\n", true, true)
+
+				Expect(session.Wait("10s")).To(gexec.Exit(1))
+			})
 		})
 	})
 })
