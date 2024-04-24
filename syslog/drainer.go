@@ -26,8 +26,6 @@ type Drainer interface {
 	Drain(line string, tag string) error
 }
 
-const ServerPollingInterval = 5 * time.Second
-
 type drainer struct {
 	conn           net.Conn
 	dialFunction   func() (net.Conn, error)
@@ -173,7 +171,9 @@ func (d *drainer) resetAttempts() {
 
 func (d *drainer) incrementAttempts() {
 	d.connAttempts++
-	d.sleepSeconds = d.sleepSeconds << 1
+	if d.maxRetries > 0 {
+		d.sleepSeconds = d.sleepSeconds << 1
+	}
 }
 
 func (d *drainer) ensureConnection() {

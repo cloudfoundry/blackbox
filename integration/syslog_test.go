@@ -627,7 +627,7 @@ var _ = Describe("Blackbox", func() {
 			session, err := gexec.Start(blackboxCmd, GinkgoWriter, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 
-			time.Sleep(2 * syslog.ServerPollingInterval)
+			time.Sleep(2 * time.Second)
 
 			buffer := gbytes.NewBuffer()
 			serverProcess = ginkgomon.Invoke(&TcpSyslogServer{
@@ -648,7 +648,10 @@ var _ = Describe("Blackbox", func() {
 			Write(logFile, "can't log this\n", false, false)
 			Write(logFile, "more\n", true, true)
 
-			time.Sleep(2 * syslog.ServerPollingInterval)
+			Eventually(session.Err, "5s").Should(gbytes.Say("Error connecting.*Will retry in 1 seconds"))
+			Eventually(session.Err, "5s").Should(gbytes.Say("Error connecting.*Will retry in 1 seconds"))
+
+			time.Sleep(2 * time.Second)
 
 			buffer2 := gbytes.NewBuffer()
 			serverProcess = ginkgomon.Invoke(&TcpSyslogServer{
@@ -790,6 +793,9 @@ var _ = Describe("Blackbox", func() {
 
 				Write(logFile, "try to log this\n", false, false)
 				Write(logFile, "try to log more and notice can't write to socket\n", true, true)
+
+				Eventually(session.Err, "5s").Should(gbytes.Say("Error connecting.*Will retry in 2 seconds"))
+				Eventually(session.Err, "5s").Should(gbytes.Say("Error connecting.*Will retry in 4 seconds"))
 
 				Expect(session.Wait("20s")).To(gexec.Exit(1))
 			})
