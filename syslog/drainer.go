@@ -171,7 +171,7 @@ func (d *drainer) resetAttempts() {
 
 func (d *drainer) incrementAttempts() {
 	d.connAttempts++
-	if d.maxRetries > 0 {
+	if d.maxRetries > 0 && d.sleepSeconds < 60 {
 		d.sleepSeconds = d.sleepSeconds << 1
 	}
 }
