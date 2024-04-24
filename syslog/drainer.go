@@ -16,9 +16,10 @@ import (
 )
 
 type Drain struct {
-	Transport string `yaml:"transport"`
-	Address   string `yaml:"address"`
-	CA        string `yaml:"ca"`
+	Transport  string `yaml:"transport"`
+	Address    string `yaml:"address"`
+	CA         string `yaml:"ca"`
+	MaxRetries int    `yaml:"max_retries"`
 }
 
 type Drainer interface {
@@ -35,6 +36,9 @@ type drainer struct {
 	structuredData rfc5424.StructuredData
 	maxMessageSize int
 	transport      string
+	maxRetries     int
+	connAttempts   int
+	sleepSeconds   int
 }
 
 func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData, maxMessageSize int) (*drainer, error) {
@@ -53,13 +57,15 @@ func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structure
 		maxMessageSize: maxMessageSize,
 		dialFunction:   dialFunction,
 		transport:      drain.Transport,
+		maxRetries:     drain.MaxRetries,
+		sleepSeconds:   1,
 	}, nil
 }
 
 func generateDialer(drain Drain, tlsConf *tls.Config) func() (net.Conn, error) {
 	var dialFunction func() (net.Conn, error)
 	dialer := &net.Dialer{
-		Timeout:   30 * time.Second,
+		Timeout:   time.Second * 30,
 		KeepAlive: time.Second * 60 * 3,
 	}
 	switch drain.Transport {
@@ -106,6 +112,8 @@ func generateTLSConfig(caString string) (*tls.Config, error) {
 }
 
 func (d *drainer) Drain(line string, tag string) error {
+	defer d.resetAttempts()
+
 	binary, err := d.formatMessage(line, tag)
 	if err != nil {
 		return err
@@ -158,12 +166,26 @@ func (d *drainer) formatMessage(line string, tag string) ([]byte, error) {
 	return binary, nil
 }
 
+func (d *drainer) resetAttempts() {
+	d.connAttempts = 0
+	d.sleepSeconds = 1
+}
+
+func (d *drainer) incrementAttempts() {
+	d.connAttempts++
+	d.sleepSeconds = d.sleepSeconds << 1
+}
+
 func (d *drainer) ensureConnection() {
 	for d.conn == nil {
+		d.incrementAttempts()
 		conn, err := d.dialFunction()
 		if err != nil {
-			d.errorLogger.Printf("Error connecting: %s \n", err.Error())
-			time.Sleep(time.Second)
+			if d.maxRetries > 0 && d.connAttempts > d.maxRetries {
+				d.errorLogger.Fatalln("Failed to connect to syslog server. Exiting now.")
+			}
+			d.errorLogger.Printf("Error connecting on attempt %d: %s. Will retry in %d seconds.\n", d.connAttempts, err.Error(), d.sleepSeconds)
+			time.Sleep(time.Second * time.Duration(d.sleepSeconds))
 		} else if conn != nil {
 			d.conn = conn
 		}
