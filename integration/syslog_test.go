@@ -580,7 +580,7 @@ var _ = Describe("Blackbox", func() {
 			err := os.WriteFile(
 				filepath.Join(logDir, "not-a-tag-dir.log"),
 				[]byte("some-data"),
-				os.ModePerm,
+				os.ModePerm, // #nosec G306
 			)
 			Expect(err).NotTo(HaveOccurred())
 

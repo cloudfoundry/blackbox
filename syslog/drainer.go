@@ -42,7 +42,7 @@ type drainer struct {
 func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData, maxMessageSize int) (*drainer, error) {
 	tlsConf, err := generateTLSConfig(drain.CA)
 	if err != nil {
-		errorLogger.Printf(err.Error())
+		errorLogger.Print(err.Error())
 		return nil, err
 	}
 
