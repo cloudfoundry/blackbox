@@ -25,3 +25,6 @@ _testmain.go
 
 /config.local.yml
 /*.txt
+
+# Idea config folder
+.idea
