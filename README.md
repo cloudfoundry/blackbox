@@ -41,7 +41,7 @@ Any new lines written to `app1/stdout.log` and `app1/stderr.log` get sent to sys
 
 If `log_filename` is set to `true` then the filename is included in the tag. For example, new lines written to `app1/stdout.log` get sent to syslog tagged as `app1/stdout.log`.
 
-Currently the priority and facility are hardcoded to `INFO` and `user`.
+Currently, the priority and facility are hardcoded to `INFO` and `user`.
 
 ## Installation
 
