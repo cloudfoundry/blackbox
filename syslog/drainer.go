@@ -42,7 +42,7 @@ type drainer struct {
 func NewDrainer(errorLogger *log.Logger, drain Drain, hostname string, structuredData rfc5424.StructuredData, maxMessageSize int) (*drainer, error) {
 	tlsConf, err := generateTLSConfig(drain.CA)
 	if err != nil {
-		errorLogger.Print(err.Error())
+		errorLogger.Println("Error generating TLS config: ", err)
 		return nil, err
 	}
 
@@ -90,8 +90,7 @@ func generateTLSConfig(caString string) (*tls.Config, error) {
 
 	ca, err := os.ReadFile(caString)
 	if err != nil {
-		err = fmt.Errorf("Error reading ca certificate: %s \n", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("error reading CA certificate: %w", err)
 	}
 
 	certPool := x509.NewCertPool()
@@ -102,7 +101,6 @@ func generateTLSConfig(caString string) (*tls.Config, error) {
 		tlsconfig.WithAuthority(certPool),
 	)
 	if err != nil {
-		err = fmt.Errorf("Error creating tls config: %s \n", err.Error())
 		return nil, err
 	}
 

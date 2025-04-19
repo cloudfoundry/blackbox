@@ -9,9 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/blackbox/syslog"
 	"code.cloudfoundry.org/go-loggregator/v9/rfc5424"
 	"github.com/tedsuo/ifrit/grouper"
+
+	"code.cloudfoundry.org/blackbox/syslog"
 )
 
 const POLL_INTERVAL = 5 * time.Second
