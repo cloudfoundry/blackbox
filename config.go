@@ -3,8 +3,9 @@ package blackbox
 import (
 	"os"
 
-	"code.cloudfoundry.org/blackbox/syslog"
 	"gopkg.in/yaml.v3"
+
+	"code.cloudfoundry.org/blackbox/syslog"
 )
 
 type SyslogConfig struct {

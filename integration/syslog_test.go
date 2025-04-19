@@ -16,8 +16,6 @@ import (
 	"github.com/tedsuo/ifrit"
 	ginkgomon "github.com/tedsuo/ifrit/ginkgomon_v2"
 
-	. "code.cloudfoundry.org/blackbox/integration"
-
 	sl "github.com/ziutek/syslog"
 
 	"code.cloudfoundry.org/blackbox"
