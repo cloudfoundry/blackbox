@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - run: go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=3 --compilers=3 --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace integration
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - uses: golangci/golangci-lint-action@v7.0.0
+
+  auto-merge:
+    name: Auto‑Merge Dependabot PRs
+    runs-on: ubuntu-latest
+    # Only proceed if other jobs have succeeded
+    needs:
+      - integration-test
+      - lint
+    # Only proceed if this is a Dependabot‐created PR
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    # Allow the job to approve and merge the PR
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Approve PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              event: 'APPROVE'
+            });
+      - name: Merge PR
+        uses: pascalgn/automerge-action@v0.15.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-method: rebase
+          merge-schedule: immediate
