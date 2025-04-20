@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.1
 
 require (
-	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
+	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	code.cloudfoundry.org/tlsconfig v0.24.0
 	github.com/nxadm/tail v1.4.11
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -22,7 +22,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
