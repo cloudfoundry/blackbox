@@ -73,7 +73,7 @@ jobs:
               event: 'APPROVE'
             });
       - name: Merge PR
-        uses: pascalgn/automerge-action@v0.15.3
+        uses: pascalgn/automerge-action@v0.16.4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           merge-method: rebase
