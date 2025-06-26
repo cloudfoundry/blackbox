@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-go@v5.5.0
         with:
           go-version-file: "go.mod"
-      - uses: golangci/golangci-lint-action@v7.0.0
+      - uses: golangci/golangci-lint-action@v8.0.0
 
   auto-merge:
     name: Auto‑Merge Dependabot PRs
