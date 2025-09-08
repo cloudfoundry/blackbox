@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.0
-      - uses: actions/setup-go@v5.5.0
+      - uses: actions/setup-go@v6.0.0
         with:
           go-version-file: "go.mod"
       - run: go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=3 --compilers=3 --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace --skip-package integration
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.0
-      - uses: actions/setup-go@v5.5.0
+      - uses: actions/setup-go@v6.0.0
         with:
           go-version-file: "go.mod"
       - run: go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=3 --compilers=3 --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace integration
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.0
-      - uses: actions/setup-go@v5.5.0
+      - uses: actions/setup-go@v6.0.0
         with:
           go-version-file: "go.mod"
       - uses: golangci/golangci-lint-action@v8.0.0
