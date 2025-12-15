@@ -7,7 +7,7 @@ require (
 	code.cloudfoundry.org/tlsconfig v0.41.0
 	github.com/nxadm/tail v1.4.11
 	github.com/onsi/ginkgo/v2 v2.27.2
-	github.com/onsi/gomega v1.38.2
+	github.com/onsi/gomega v1.38.3
 	github.com/tedsuo/ifrit v0.0.0-20230516164442-7862c310ad26
 	github.com/ziutek/syslog v0.0.0-20180426113420-8a9fdf1a8529
 	gopkg.in/yaml.v3 v3.0.1
