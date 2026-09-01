@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"log/slog"
 	"os"
 	"testing"
 
@@ -13,6 +14,8 @@ import (
 var blackboxPath string
 
 func TestIntegration(t *testing.T) {
+	slog.SetDefault(slog.New(slog.NewTextHandler(GinkgoWriter, nil)))
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Integration Suite")
 }
